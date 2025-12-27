@@ -1,0 +1,34 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="asgiref" />
+          <option value="certifi" />
+          <option value="charset-normalizer" />
+          <option value="cloudinary" />
+          <option value="Django" />
+          <option value="django-ckeditor" />
+          <option value="django-cloudinary-storage" />
+          <option value="django-js-asset" />
+          <option value="djangorestframework" />
+          <option value="drf-yasg" />
+          <option value="idna" />
+          <option value="inflection" />
+          <option value="packaging" />
+          <option value="pillow" />
+          <option value="PyMySQL" />
+          <option value="pytz" />
+          <option value="PyYAML" />
+          <option value="requests" />
+          <option value="six" />
+          <option value="sqlparse" />
+          <option value="tzdata" />
+          <option value="uritemplate" />
+          <option value="urllib3" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
