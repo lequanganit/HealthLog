@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'health.apps.HealthConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -74,11 +76,21 @@ WSGI_APPLICATION = 'healthapis.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'healthdb',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': ''  # mặc định localhost
     }
 }
+AUTH_USER_MODEL = 'health.User'
 
+import cloudinary.api
+cloudinary.config(
+  	cloud_name = "durpn2bki",
+  	api_key = "618347915231647",
+  	api_secret = "yBdqjB1JHz0jpnwFaIQhE8wZmjE"
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
