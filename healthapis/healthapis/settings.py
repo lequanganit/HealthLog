@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+import oauth2_provider.contrib.rest_framework
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,8 +39,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'healthapis.apps.HealthConfig'
+    'health.apps.HealthConfig',
+    'rest_framework',
+    'oauth2_provider',
+    'cloudinary',
+
 ]
+REST_FRAMEWORK = {
+'DEFAULT_AUTHENTICATION_CLASSES': ['oauth2_provider.contrib.rest_framework.OAuth2Authentication']
+}
+
+CLIENT_ID ='fxGJPzHmHiVphQSJ0eTviLBz5UCiVP4qUUSathjL'
+CLIENT_SECRET ='8OvvDFiwi8kHteejHqkGrYKKL9Yz8K7ji9FLqfad4yGdad4tOv1n4txYwRgRTvWjjzbSDGKrLSNsBqodL23SlRJN0S2DbJpVw3i3FdeALo00uZRa2Qmc18521KMwImXK'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -82,7 +94,14 @@ DATABASES = {
         'HOST': ''  # mặc định localhost
     }
 }
+AUTH_USER_MODEL = 'health.User'
 
+import cloudinary.api
+cloudinary.config(
+  	cloud_name = "durpn2bki",
+  	api_key = "618347915231647",
+  	api_secret = "yBdqjB1JHz0jpnwFaIQhE8wZmjE"
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
