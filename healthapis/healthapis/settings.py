@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'cloudinary',
+    'drf_yasg',
 
 ]
 REST_FRAMEWORK = {
@@ -88,7 +89,7 @@ WSGI_APPLICATION = 'healthapis.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'healthlogdb',
+        'NAME': 'healthdb',
         'USER': 'root',
         'PASSWORD': 'root',
         'HOST': ''  # mặc định localhost
