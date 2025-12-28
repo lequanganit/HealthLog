@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from health.models import User
+from health.models import User, DailyHealthMetric, Gender, WorkoutPlan
+from django.core.exceptions import ValidationError
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,4 +21,21 @@ class UserSerializer(serializers.ModelSerializer):
                 'write_only': True
             }
         }
+class HealthMetricSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= DailyHealthMetric
+        fields= ['id', 'date', 'steps', 'water_intake', 'calories_burned', 'created_date']
+    def validate_steps(self, value):
+        if value < 0:
+            raise ValidationError({'steps': 'Invalid steps'})
+        return value
+    def validate_water_intake(self, value):
+        if value < 0:
+            raise ValidationError({'water_intake': 'Invalid water intake'})
+        return value
+class WorkoutPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkoutPlan
+        fields = [ 'id','name','date','total_duration','note','created_date']
+
 

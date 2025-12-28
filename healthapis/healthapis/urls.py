@@ -16,9 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from rest_framework import routers
 
-from health.views import UserViewSet
+
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -36,12 +35,11 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-r = routers.DefaultRouter()
-r.register('users', UserViewSet)
+
 
 urlpatterns = [
+    path('', include('health.urls')),
     path('admin/', admin.site.urls),
-    path('', include(r.urls)),
     path('o/',include('oauth2_provider.urls')),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',schema_view.without_ui(cache_timeout=0),name='schema-json'),
     re_path(r'^swagger/$',schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
