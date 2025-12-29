@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'healthapis.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'healthdb',
+        'NAME': 'healthlogdb',
         'USER': 'root',
         'PASSWORD': 'root',
         'HOST': ''  # mặc định localhost

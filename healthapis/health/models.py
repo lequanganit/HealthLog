@@ -46,9 +46,16 @@ class HealthProfile(BaseModel):
     age = models.IntegerField()
     gender = models.CharField(max_length=10,choices=Gender.choices)
     goal = models.CharField(max_length=255)
+    bmi = models.FloatField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.height and self.weight:
+            height_m = self.height / 100
+            self.bmi = round( (self.weight / (height_m **2)),2)
+            super().save( *args, **kwargs)
 
     def __str__(self):
-        return f"Hồ sơ của{self.user.username}"
+        return f"Hồ sơ của {self.user.username} - chỉ số BMI là: {self.bmi}"
 
 #chi so co ban
 class DailyHealthMetric(BaseModel):
