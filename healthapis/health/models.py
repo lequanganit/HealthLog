@@ -131,5 +131,6 @@ class HealthJournal(BaseModel):
     workout_plan = models.OneToOneField(WorkoutPlan, on_delete=models.CASCADE)
     content = models.TextField()
 
+
     def __str__(self):
         return f"Nhật ký {self.updated_date}"
