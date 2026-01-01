@@ -54,28 +54,27 @@ class HealthMetricViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
         # tự gán user khi POST, ko cần client gửi lên bảo mật
         serializer.save(user=self.request.user)
 # kế hoạch tập luyện
-class ExercisePlanViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.RetrieveAPIView,
-                       generics.UpdateAPIView, generics.DestroyAPIView):
+class ExercisePlanViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ExercisePlanSerializer
-    queryset = ExercisePlan.objects.filter(active=True)
     http_method_names = ['get', 'post', 'patch', 'delete']
-
     def get_queryset(self):
-        # chỉ lấy kế hoạch của user đang đăng nhập
-        return self.queryset.filter(user=self.request.user)
-
+        return ExercisePlan.objects.filter(
+            active=True,
+            user=self.request.user
+        )
     def perform_create(self, serializer):
-        # gán user khi tạo
         serializer.save(user=self.request.user)
 
+    def perform_destroy(self, instance):
+        instance.active = False
+        instance.save(update_fields=['active'])
     @action(detail=True, methods=['get', 'post'])
     def exercises(self, request, pk):
         if request.method == 'GET':
-            qs = ExercisePlant_Exercise.objects.filter(exercise_plan_id=pk).select_related('exercise')
+            qs = ExercisePlant_Exercise.objects.filter(exercise_plan_id=pk,active=True).select_related('exercise')
             serializer = ExerciseInPlanSerializer(qs, many=True)
-            return Response(serializer.data)
-        # them bai tap vao ke hoach
+            return Response(serializer.data, status=status.HTTP_200_OK)
         serializer = AddExerciseToPlanSerializer(data=request.data,context={'plan_id': pk})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -83,7 +82,6 @@ class ExercisePlanViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
             {"message": "Thêm bài tập thành công"},
             status=status.HTTP_201_CREATED
         )
-
 class HealthJournalViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = HealthJournalSerializer
