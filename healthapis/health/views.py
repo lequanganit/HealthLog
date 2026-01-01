@@ -4,9 +4,9 @@ from rest_framework import viewsets, permissions, parsers, status, generics, ser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from health.models import User, HealthProfile, DailyHealthMetric, WorkoutPlan, HealthJournal, Reminder
-from health.serializers import UserSerializer, HealthProfileSerializer, HealthMetricSerializer, WorkoutPlanSerializer, \
-    HealthJournalSerializer, ReminderSerializer
+from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise, ExercisePlant_Exercise
+from health.serializers import UserSerializer, HealthProfileSerializer, HealthMetricSerializer, ExercisePlanSerializer, \
+    HealthJournalSerializer, ReminderSerializer, ExerciseSerializer, ExerciseInPlanSerializer, AddExerciseToPlanSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet, generics.GenericAPIView):
@@ -53,12 +53,12 @@ class HealthMetricViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
     def perform_create(self, serializer):
         # tự gán user khi POST, ko cần client gửi lên bảo mật
         serializer.save(user=self.request.user)
-
+# kế hoạch tập luyện
 class ExercisePlanViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.RetrieveAPIView,
                        generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = WorkoutPlanSerializer
-    queryset = WorkoutPlan.objects.filter(active=True)
+    serializer_class = ExercisePlanSerializer
+    queryset = ExercisePlan.objects.filter(active=True)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
@@ -68,6 +68,21 @@ class ExercisePlanViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
     def perform_create(self, serializer):
         # gán user khi tạo
         serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['get', 'post'])
+    def exercises(self, request, pk):
+        if request.method == 'GET':
+            qs = ExercisePlant_Exercise.objects.filter(exercise_plan_id=pk).select_related('exercise')
+            serializer = ExerciseInPlanSerializer(qs, many=True)
+            return Response(serializer.data)
+        # them bai tap vao ke hoach
+        serializer = AddExerciseToPlanSerializer(data=request.data,context={'plan_id': pk})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"message": "Thêm bài tập thành công"},
+            status=status.HTTP_201_CREATED
+        )
 
 class HealthJournalViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -117,3 +132,14 @@ class ReminderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+class ExerciseView(viewsets.ViewSet,
+                   generics.ListAPIView,
+                   generics.CreateAPIView,
+                   generics.RetrieveAPIView,
+                   generics.UpdateAPIView,
+                   generics.DestroyAPIView):
+    queryset = Exercise.objects.filter(active=True)
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    serializer_class = ExerciseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+

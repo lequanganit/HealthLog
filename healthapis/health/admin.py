@@ -7,6 +7,6 @@ admin.site.register(HealthProfile)
 admin.site.register(Food)
 admin.site.register(Exercise)
 admin.site.register(NutritionPlan)
-admin.site.register(WorkoutPlan)
+admin.site.register(ExercisePlan)
 admin.site.register(DailyHealthMetric)
 # Register your models here.

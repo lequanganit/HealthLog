@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from health.models import User, HealthProfile, DailyHealthMetric, WorkoutPlan, HealthJournal, Reminder
+from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise,  ExercisePlant_Exercise
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -50,11 +50,37 @@ class HealthMetricSerializer(serializers.ModelSerializer):
             raise ValidationError({'water_intake': 'Invalid water intake'})
         return value
 
-class WorkoutPlanSerializer(serializers.ModelSerializer):
+class ExercisePlanSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WorkoutPlan
+        model = ExercisePlan
         fields = [ 'id','name','date','total_duration','note','created_date']
 
+class ExerciseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exercise
+        fields = ['id', 'name', 'description', 'created_date', 'updated_date']
+        #he thong tu tao, ko cho client gui len
+        read_only_fields = ['id', 'created_date', 'updated_date']
+
+class ExerciseInPlanSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='exercise.name')
+    description = serializers.CharField(source='exercise.description')
+    class Meta:
+        model = ExercisePlant_Exercise
+        fields = ['id', 'name', 'description', 'repetitions', 'duration']
+class AddExerciseToPlanSerializer(serializers.ModelSerializer):
+    exercise_id = serializers.IntegerField()
+    class Meta:
+        model = ExercisePlant_Exercise
+        fields = ['exercise_id', 'repetitions', 'duration']
+    def create(self, validated_data):
+        plan_id = self.context['plan_id']
+        exercise_id = validated_data.pop('exercise_id')
+        return ExercisePlant_Exercise.objects.create(
+            exercise_plan_id=plan_id,
+            exercise_id=exercise_id,
+            **validated_data
+        )
 class HealthJournalSerializer(serializers.ModelSerializer):
     class Meta:
         model: HealthJournal
@@ -64,4 +90,5 @@ class ReminderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reminder
         fields = ['title_name','time','describe','created_date']
+
 

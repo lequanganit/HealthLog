@@ -98,7 +98,7 @@ class NutritionPlan(BaseModel):
         return self.goal_type
 
 #ke hoach tap luyen
-class WorkoutPlan(BaseModel):
+class ExercisePlan(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     date = models.DateField()
@@ -117,18 +117,18 @@ class Exercise(BaseModel):
         return self.name
 
 # mqh giua bai tap va ke hoach tap luyen
-class WorkoutExercise(BaseModel):
-    workout_plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE)
+class ExercisePlant_Exercise(BaseModel):
+    exercise_plan = models.ForeignKey(ExercisePlan, on_delete=models.CASCADE)
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
     repetitions = models.IntegerField()
     duration = models.IntegerField()  # minutes
 
     class Meta:
-        unique_together = ('workout_plan', 'exercise')
+        unique_together = ('exercise_plan', 'exercise')
 
 # nhat ki suc khoe
 class HealthJournal(BaseModel):
-    workout_plan = models.OneToOneField(WorkoutPlan, on_delete=models.CASCADE)
+    exercise_plan = models.OneToOneField(ExercisePlan, on_delete=models.CASCADE)
     content = models.TextField()
 
 
