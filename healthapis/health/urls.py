@@ -12,6 +12,7 @@ r.register('exercises_plans', ExercisePlanViewSet, basename='exercise-plan')
 r.register('reminders', ReminderViewSet, basename='reminders')
 r.register('HealthJournal', HealthJournalViewSet, basename='HealthJournal')
 r.register(r'exercises', views.ExerciseView, basename='exercise')
+r.register('connections', views.ConnectionViewSet, basename='connections')
 
 urlpatterns = [
     path('', include(r.urls))

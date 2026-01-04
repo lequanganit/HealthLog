@@ -10,6 +10,11 @@ class Gender(models.TextChoices):
     MALE = 'MALE'
     FEMALE = 'FEMALE'
     OTHER = 'OTHER'
+class ConnectionStatus(models.TextChoices):
+    PENDING = 'PENDING'
+    ACTIVE = 'ACTIVE'
+    DECLINED = 'DECLINED'
+
 
 class Expertise(models.TextChoices):
     WEIGHT_GAIN = 'WEIGHT_GAIN'
@@ -37,7 +42,12 @@ class Expert(BaseModel):
 
     def __str__(self):
         return f"{self.user.username} - {self.expertise}"
-
+class Connection(BaseModel):
+    user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='connection')
+    expert = models.ForeignKey(Expert,on_delete=models.CASCADE,related_name='connections')
+    status = models.CharField(max_length=20,choices=ConnectionStatus.choices,default=ConnectionStatus.PENDING)
+    def __str__(self):
+        return f"{self.user.username} - {self.expert.user.username} ({self.status})"
 # ho so suc khoe
 class HealthProfile(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

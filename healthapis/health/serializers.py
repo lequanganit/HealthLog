@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise,  ExercisePlant_Exercise
+from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise,  ExercisePlant_Exercise, Connection
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -90,5 +90,10 @@ class ReminderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reminder
         fields = ['title_name','time','describe','created_date']
+class ConnectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Connection
+        fields = ['id', 'user', 'expert', 'status', 'created_date']
+        read_only_fields = ['user', 'status']
 
 

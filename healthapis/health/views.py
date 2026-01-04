@@ -3,10 +3,12 @@ from datetime import datetime, date
 from rest_framework import viewsets, permissions, parsers, status, generics, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
+from health.perms import IsUser, IsExpert, IsConnectionOwnerOrExpert
 
-from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise, ExercisePlant_Exercise
+from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise, ExercisePlant_Exercise, Connection
 from health.serializers import UserSerializer, HealthProfileSerializer, HealthMetricSerializer, ExercisePlanSerializer, \
-    HealthJournalSerializer, ReminderSerializer, ExerciseSerializer, ExerciseInPlanSerializer, AddExerciseToPlanSerializer
+    HealthJournalSerializer, ReminderSerializer, ExerciseSerializer, ExerciseInPlanSerializer, AddExerciseToPlanSerializer, ConnectionSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet, generics.GenericAPIView):
@@ -140,4 +142,29 @@ class ExerciseView(viewsets.ViewSet,
     http_method_names = ['get', 'post', 'patch', 'delete']
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class ConnectionViewSet(viewsets.ModelViewSet):
+    serializer_class = ConnectionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'USER':
+            return Connection.objects.filter(user=user)
+        return Connection.objects.filter(expert__user=user)
+
+    def perform_create(self, serializer):
+        if self.request.user.role != 'USER':
+            raise PermissionDenied("Chỉ USER được tạo kết nối")
+        serializer.save(user=self.request.user)
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsUser()]
+        if self.action == 'partial_update':
+            return [IsExpert()]
+        if self.action in ['retrieve', 'destroy']:
+            return [permissions.IsAuthenticated(), IsConnectionOwnerOrExpert()]
+        return super().get_permissions()
 
