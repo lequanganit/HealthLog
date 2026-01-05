@@ -10,4 +10,6 @@ admin.site.register(NutritionPlan)
 admin.site.register(ExercisePlan)
 admin.site.register(DailyHealthMetric)
 admin.site.register(ExercisePlant_Exercise)
+admin.site.register(Connection)
+
 # Register your models here.

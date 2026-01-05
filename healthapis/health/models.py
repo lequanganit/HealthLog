@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from cloudinary.models import CloudinaryField
+from rest_framework.exceptions import ValidationError
+
 
 class UserRole(models.TextChoices):
     USER = 'USER'
@@ -33,21 +35,34 @@ class User(AbstractUser, BaseModel):
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20,choices=UserRole.choices,default=UserRole.USER)
     avatar = CloudinaryField(null=True, blank=True)
+
     def __str__(self):
         return self.username
 
 class Expert(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    expertise = models.CharField(max_length=30,choices=Expertise.choices)
+    expertise = models.CharField(max_length=30,choices=Expertise.choices, default=Expertise.MAINTAINING)
+    experience_year = models.IntegerField(default=0)
+
+    def clean(self):
+        if self.user.role != UserRole.EXPERT:
+            raise ValidationError("User must have role EXPERT")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.username} - {self.expertise}"
+
 class Connection(BaseModel):
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='connection')
     expert = models.ForeignKey(Expert,on_delete=models.CASCADE,related_name='connections')
     status = models.CharField(max_length=20,choices=ConnectionStatus.choices,default=ConnectionStatus.PENDING)
+
     def __str__(self):
         return f"{self.user.username} - {self.expert.user.username} ({self.status})"
+
 # ho so suc khoe
 class HealthProfile(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -57,6 +72,10 @@ class HealthProfile(BaseModel):
     gender = models.CharField(max_length=10,choices=Gender.choices)
     goal = models.CharField(max_length=255)
     bmi = models.FloatField(null=True, blank=True)
+
+    def clean(self):
+        if self.user.role != UserRole.USER:
+            raise ValidationError("Expert cannot have UserProfile")
 
     def save(self, *args, **kwargs):
         if self.height and self.weight:
@@ -140,7 +159,6 @@ class ExercisePlant_Exercise(BaseModel):
 class HealthJournal(BaseModel):
     exercise_plan = models.OneToOneField(ExercisePlan, on_delete=models.CASCADE)
     content = models.TextField()
-
 
     def __str__(self):
         return f"Nhật ký {self.updated_date}"

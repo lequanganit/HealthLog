@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise,  ExercisePlant_Exercise, Connection
+from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise, \
+    ExercisePlant_Exercise, Connection, Expert, UserRole
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,6 +22,17 @@ class UserSerializer(serializers.ModelSerializer):
                 'write_only': True
             }
         }
+
+class ExpertSerializer(serializers.ModelSerializer):
+    pass
+
+    def validate(self, attrs):
+        user = attrs['user']
+        if user.role != UserRole.EXPERT:
+            raise serializers.ValidationError(
+                "This account is not an expert"
+            )
+        return attrs
 
 
 class HealthProfileSerializer(serializers.ModelSerializer):
@@ -68,6 +80,7 @@ class ExerciseInPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExercisePlant_Exercise
         fields = ['id', 'name', 'description', 'repetitions', 'duration']
+
 class AddExerciseToPlanSerializer(serializers.ModelSerializer):
     exercise_id = serializers.IntegerField()
     class Meta:
@@ -81,6 +94,7 @@ class AddExerciseToPlanSerializer(serializers.ModelSerializer):
             exercise_id=exercise_id,
             **validated_data
         )
+
 class HealthJournalSerializer(serializers.ModelSerializer):
     class Meta:
         model: HealthJournal
@@ -90,10 +104,9 @@ class ReminderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reminder
         fields = ['title_name','time','describe','created_date']
+
 class ConnectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Connection
         fields = ['id', 'user', 'expert', 'status', 'created_date']
         read_only_fields = ['user', 'status']
-
-

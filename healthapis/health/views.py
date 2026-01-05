@@ -2,13 +2,18 @@ from datetime import datetime, date
 
 from rest_framework import viewsets, permissions, parsers, status, generics, serializers
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.views import APIView
+
 from health.perms import IsUser, IsExpert, IsConnectionOwnerOrExpert
 
-from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise, ExercisePlant_Exercise, Connection
+from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise, \
+    ExercisePlant_Exercise, Connection, UserRole, Expert
 from health.serializers import UserSerializer, HealthProfileSerializer, HealthMetricSerializer, ExercisePlanSerializer, \
-    HealthJournalSerializer, ReminderSerializer, ExerciseSerializer, ExerciseInPlanSerializer, AddExerciseToPlanSerializer, ConnectionSerializer
+    HealthJournalSerializer, ReminderSerializer, ExerciseSerializer, ExerciseInPlanSerializer, \
+    AddExerciseToPlanSerializer, ConnectionSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet, generics.GenericAPIView):
@@ -42,8 +47,9 @@ class HealthProfileViewSet(viewsets.ModelViewSet, generics.GenericAPIView):
             raise serializers.ValidationError({'detail': 'User with this username already exists.'})
         serializer.save(user=self.request.user)
 
+
 class HealthMetricViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.RetrieveAPIView,
-                       generics.DestroyAPIView):
+                          generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = HealthMetricSerializer
     queryset = DailyHealthMetric.objects.filter(active=True)
@@ -55,35 +61,42 @@ class HealthMetricViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
     def perform_create(self, serializer):
         # tự gán user khi POST, ko cần client gửi lên bảo mật
         serializer.save(user=self.request.user)
+
+
 # kế hoạch tập luyện
 class ExercisePlanViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ExercisePlanSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
+
     def get_queryset(self):
         return ExercisePlan.objects.filter(
             active=True,
             user=self.request.user
         )
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
     def perform_destroy(self, instance):
         instance.active = False
         instance.save(update_fields=['active'])
+
     @action(detail=True, methods=['get', 'post'])
     def exercises(self, request, pk):
         if request.method == 'GET':
-            qs = ExercisePlant_Exercise.objects.filter(exercise_plan_id=pk,active=True).select_related('exercise')
+            qs = ExercisePlant_Exercise.objects.filter(exercise_plan_id=pk, active=True).select_related('exercise')
             serializer = ExerciseInPlanSerializer(qs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = AddExerciseToPlanSerializer(data=request.data,context={'plan_id': pk})
+        serializer = AddExerciseToPlanSerializer(data=request.data, context={'plan_id': pk})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
             {"message": "Thêm bài tập thành công"},
             status=status.HTTP_201_CREATED
         )
+
+
 class HealthJournalViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = HealthJournalSerializer
@@ -94,21 +107,21 @@ class HealthJournalViewSet(viewsets.ViewSet):
 
     def perform_create(self, serializer):
         today = date.today()
-        existing_journal  = HealthJournal.objects.filter(
-            user = self.request.user,
-            update_date = today,
-            active = True
+        existing_journal = HealthJournal.objects.filter(
+            user=self.request.user,
+            update_date=today,
+            active=True
         ).first()
 
         if existing_journal:
             serializer.instance = existing_journal
             serializer.save()
 
-        else :
+        else:
             serializer.save(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        today  = date.today()
+        today = date.today()
 
         existing_journal = HealthJournal.objects.filter(
             user=self.request.user,
@@ -123,6 +136,7 @@ class HealthJournalViewSet(viewsets.ViewSet):
             response.data['message'] = "Đã cập nhật nhật ký ngày hôm nay."
         return response
 
+
 class ReminderViewSet(viewsets.ModelViewSet):
     serializer_class = ReminderSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -132,6 +146,8 @@ class ReminderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
 class ExerciseView(viewsets.ViewSet,
                    generics.ListAPIView,
                    generics.CreateAPIView,
@@ -142,6 +158,33 @@ class ExerciseView(viewsets.ViewSet,
     http_method_names = ['get', 'post', 'patch', 'delete']
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class ExpertUserProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        print (user)
+        print ("hello")
+        if user.role != UserRole.EXPERT:
+            raise PermissionDenied("Chỉ chuyên gia mới được truy cập")
+
+        connected_user_ids = Expert.objects.filter(user=user)
+
+        print(connected_user_ids)
+
+
+        profiles = HealthProfile.objects.filter(user__id__in=connected_user_ids)
+
+        serializer = HealthProfileSerializer(profiles, many=True)
+
+        print (profiles)
+        print(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ConnectionViewSet(viewsets.ModelViewSet):
     serializer_class = ConnectionSerializer
@@ -167,4 +210,3 @@ class ConnectionViewSet(viewsets.ModelViewSet):
         if self.action in ['retrieve', 'destroy']:
             return [permissions.IsAuthenticated(), IsConnectionOwnerOrExpert()]
         return super().get_permissions()
-
