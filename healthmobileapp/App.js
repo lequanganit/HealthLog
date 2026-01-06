@@ -5,14 +5,13 @@ import { useReducer } from "react";
 import Welcome from './screens/Welcome/Welcome';
 import Login from './screens/User/Login';
 import Register from './screens/User/Register';
-import Home from './screens/Home/Home';
 import ExpertHome from './screens/ExpertHome/ExpertHome';
 import ChooseMode from './screens/ChooseMode/ChooseMode';
 
 
 import { MyUserContext } from "./utils/MyContexts";
 import MyUserReducer from "./reducers/MyUserReducer";
-
+import HomeTabs from "./screens/Home/HomeTabs";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -25,9 +24,10 @@ export default function App() {
           <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="ExpertHome" component={ExpertHome} />
           <Stack.Screen name="ChooseMode" component={ChooseMode} />
+          <Stack.Screen name="Home" component={HomeTabs} />
+
 
         </Stack.Navigator>
       </NavigationContainer>

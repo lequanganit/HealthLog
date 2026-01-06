@@ -49,8 +49,8 @@ const Login = ({route}) => {
     const data = new URLSearchParams();
     data.append("username", user.username);
     data.append("password", user.password);
-    data.append("client_id", "lOLoyDZLInReEtLer9NuBLefZpwiy1NgGpz2GVQ7");
-    data.append("client_secret", "1i5JrNK8ryHzBwwWV1OpzR3w3I7hGYe8N15AB826o9B6nxa50oIci7NNaf0NNE9ZSBTpP117Kfu4weQleOEL4aNX5ZcKua1b1r2xfDFYTEEZGZcr4AabYjAJrG12Ei3Z");
+    data.append("client_id", process.env.REACT_APP_CLIENT_ID);
+    data.append("client_secret", process.env.REACT_APP_SECRET_KEY);
     data.append("grant_type", "password");
 
     const res = await Apis.post(endpoints['login'], data, {
