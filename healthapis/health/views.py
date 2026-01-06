@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
+from health import  paginators
 
 from health.perms import IsUser, IsExpert, IsConnectionOwnerOrExpert
 
@@ -158,6 +159,7 @@ class ExerciseView(viewsets.ViewSet,
     http_method_names = ['get', 'post', 'patch', 'delete']
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = paginators.ItemPagination
 
 
 class ExpertUserProfileView(APIView):
