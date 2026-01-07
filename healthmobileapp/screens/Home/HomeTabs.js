@@ -10,7 +10,16 @@ const Tab = createBottomTabNavigator();
 
 const HomeTabs = () => {
     return (
-        <Tab.Navigator screenOptions={{ headerShown: true }}>
+        <Tab.Navigator screenOptions={{
+            headerShown: true,
+            headerTitleAlign: "left",
+            headerTitleStyle: {
+                fontSize: 25,
+                fontWeight: "600",
+                color: "#153aabff",
+                paddingLeft: 8,
+            },
+        }}>
             <Tab.Screen
                 name="Home"
                 component={Home}
@@ -20,27 +29,27 @@ const HomeTabs = () => {
             <Tab.Screen
                 name="Hồ sơ sức khỏe"
                 component={HealthProfile}
-                options={{ title: "Hồ sơ sức khỏe" , tabBarIcon: () => <Icon source="account-heart-outline" size={30} color="blue" /> }}
+                options={{ title: "Hồ sơ sức khỏe", tabBarIcon: () => <Icon source="account-heart-outline" size={30} color="blue" /> }}
             />
             <Tab.Screen
                 name="Kế hoạch tập luyện"
                 component={ExercisePlan}
-                options={{ title: "Kế hoạch tập luyện", tabBarIcon: () => <Icon source="calendar-text-outline" size={30} color="blue" />  }}
+                options={{ title: "Kế hoạch tập luyện", tabBarIcon: () => <Icon source="calendar-text-outline" size={30} color="blue" /> }}
             />
             <Tab.Screen
                 name="Bài tập"
                 component={Exercise}
-                options={{ title: "Bài tập", tabBarIcon: () => <Icon source="calendar-edit-outline" size={30} color="blue" />  }}
+                options={{ title: "Bài tập", tabBarIcon: () => <Icon source="calendar-edit-outline" size={30} color="blue" /> }}
             />
             <Tab.Screen
                 name="Nhắc nhở"
                 component={Reminder}
-                options={{ title: "Nhắc nhở", tabBarIcon: () => <Icon source="alarm-note" size={30} color="blue" />  }}
+                options={{ title: "Nhắc nhở", tabBarIcon: () => <Icon source="alarm-note" size={30} color="blue" /> }}
             />
             <Tab.Screen
                 name="Logout"
                 component={Logout}
-                options={{ title: "Đăng xuất", tabBarIcon: () => <Icon source="logout" size={30} color="blue" />  }}
+                options={{ title: "Đăng xuất", tabBarIcon: () => <Icon source="logout" size={30} color="blue" /> }}
             />
         </Tab.Navigator>
     );

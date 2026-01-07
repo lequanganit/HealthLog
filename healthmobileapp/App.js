@@ -20,6 +20,9 @@ export default function App() {
   return (
     <MyUserContext.Provider value={[user, dispatch]}>
       <NavigationContainer>
+
+        
+
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Login" component={Login} />
@@ -28,7 +31,8 @@ export default function App() {
           <Stack.Screen name="ChooseMode" component={ChooseMode} />
           <Stack.Screen name="Home" component={HomeTabs} />
 
-
+          
+        
         </Stack.Navigator>
       </NavigationContainer>
     </MyUserContext.Provider>
