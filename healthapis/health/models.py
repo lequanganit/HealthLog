@@ -12,6 +12,7 @@ class Gender(models.TextChoices):
     MALE = 'MALE'
     FEMALE = 'FEMALE'
     OTHER = 'OTHER'
+
 class ConnectionStatus(models.TextChoices):
     PENDING = 'PENDING'
     ACTIVE = 'ACTIVE'
@@ -19,6 +20,11 @@ class ConnectionStatus(models.TextChoices):
 
 
 class Expertise(models.TextChoices):
+    WEIGHT_GAIN = 'WEIGHT_GAIN'
+    WEIGHT_LOSS = 'WEIGHT_LOSS'
+    MAINTAINING = 'MAINTAINING'
+
+class GoalUser(models.TextChoices):
     WEIGHT_GAIN = 'WEIGHT_GAIN'
     WEIGHT_LOSS = 'WEIGHT_LOSS'
     MAINTAINING = 'MAINTAINING'
@@ -70,7 +76,7 @@ class HealthProfile(BaseModel):
     weight = models.FloatField()
     age = models.IntegerField()
     gender = models.CharField(max_length=10,choices=Gender.choices)
-    goal = models.CharField(max_length=255)
+    goal = models.CharField(max_length=255, choices=GoalUser.choices, default=GoalUser.MAINTAINING)
     bmi = models.FloatField(null=True, blank=True)
 
     def clean(self):
@@ -90,9 +96,9 @@ class HealthProfile(BaseModel):
 class DailyHealthMetric(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
-    steps = models.IntegerField()
-    water_intake = models.FloatField()
-    calories_burned = models.FloatField()
+    steps = models.IntegerField(default=0)
+    water_intake = models.FloatField(default=0)
+    calories_burned = models.FloatField(default=0)
 
     class Meta:
         unique_together = ('user', 'date')
