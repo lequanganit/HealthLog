@@ -1,9 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./Home";
 import HealthProfile from "../HealthProfile/HealthProfile";
-import ExercisePlan from "../ExercisePlan/ExercisePlan";
-import Exercise from "../Exercise/Exercise";
+import ExercisePlanScreen from "../ExercisePlan/ExercisePlanScreen";
+import ExerciseScreen from "../Exercise/ExerciseScreen";
 import Reminder from "../Reminder/Reminder";
+import HealthJournal from "../HealthJournal/HealthJournal";
 import Logout from "../User/Logout";
 import { Icon } from 'react-native-paper';
 const Tab = createBottomTabNavigator();
@@ -12,7 +13,7 @@ const HomeTabs = () => {
     return (
         <Tab.Navigator screenOptions={{ headerShown: true }}>
             <Tab.Screen
-                name="Home"
+                name="HomeTab"
                 component={Home}
                 options={{ title: "Trang chủ", tabBarIcon: () => <Icon source="home" size={30} color="blue" /> }}
             />
@@ -24,12 +25,12 @@ const HomeTabs = () => {
             />
             <Tab.Screen
                 name="Kế hoạch tập luyện"
-                component={ExercisePlan}
+                component={ExercisePlanScreen}
                 options={{ title: "Kế hoạch tập luyện", tabBarIcon: () => <Icon source="calendar-text-outline" size={30} color="blue" />  }}
             />
             <Tab.Screen
                 name="Bài tập"
-                component={Exercise}
+                component={ExerciseScreen}
                 options={{ title: "Bài tập", tabBarIcon: () => <Icon source="calendar-edit-outline" size={30} color="blue" />  }}
             />
             <Tab.Screen
@@ -38,10 +39,16 @@ const HomeTabs = () => {
                 options={{ title: "Nhắc nhở", tabBarIcon: () => <Icon source="alarm-note" size={30} color="blue" />  }}
             />
             <Tab.Screen
+                name="Nhật kí sức khỏe"
+                component={HealthJournal}
+                options={{ title: "Nhật kí sức khỏe", tabBarIcon: () => <Icon source="pen" size={30} color="blue" />  }}
+            />
+            <Tab.Screen
                 name="Logout"
                 component={Logout}
                 options={{ title: "Đăng xuất", tabBarIcon: () => <Icon source="logout" size={30} color="blue" />  }}
             />
+
         </Tab.Navigator>
     );
 };

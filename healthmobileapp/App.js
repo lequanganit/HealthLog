@@ -7,6 +7,8 @@ import Login from './screens/User/Login';
 import Register from './screens/User/Register';
 import ExpertHome from './screens/ExpertHome/ExpertHome';
 import ChooseMode from './screens/ChooseMode/ChooseMode';
+import ExercisePlanDetail from './components/ExercisePlanDetail';
+
 
 
 import { MyUserContext } from "./utils/MyContexts";
@@ -27,6 +29,7 @@ export default function App() {
           <Stack.Screen name="ExpertHome" component={ExpertHome} />
           <Stack.Screen name="ChooseMode" component={ChooseMode} />
           <Stack.Screen name="Home" component={HomeTabs} />
+          <Stack.Screen name="ExercisePlanDetail" component={ExercisePlanDetail} />
 
 
         </Stack.Navigator>

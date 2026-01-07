@@ -8,6 +8,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from health import  paginators
 
+
 from health.perms import IsUser, IsExpert, IsConnectionOwnerOrExpert
 
 from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, HealthJournal, Reminder, Exercise, \
@@ -75,6 +76,7 @@ class ExercisePlanViewSet(viewsets.ModelViewSet):
             active=True,
             user=self.request.user
         )
+
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
