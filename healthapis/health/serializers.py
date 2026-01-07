@@ -101,12 +101,14 @@ class HealthJournalSerializer(serializers.ModelSerializer):
         fields = ['workout_plan', 'exercise', 'created_date']
 
 class ReminderSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField()
+    describe  = serializers.CharField(required=False,allow_blank=True)
     class Meta:
         model = Reminder
-        fields = ['title_name','time','describe','created_date']
+        fields = ['id','user','title_name','time','describe','created_date']
 
 class ConnectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Connection
-        fields = ['id', 'user', 'expert', 'status', 'created_date']
+        fields = ['id', 'user', 'expert', 'status', ]
         read_only_fields = ['user', 'status']

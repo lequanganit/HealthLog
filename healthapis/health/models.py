@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from cloudinary.models import CloudinaryField
@@ -110,7 +112,7 @@ class DailyHealthMetric(BaseModel):
 class Reminder(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title_name = models.CharField(max_length=100)
-    time = models.CharField(max_length=50)
+    time = models.DateTimeField( default=datetime.now)
     describe = models.TextField(default='')
 
     def __str__(self):
