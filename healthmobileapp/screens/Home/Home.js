@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { MyUserContext } from "../../utils/MyContexts";
 import MyStyles from "../../styles/MyStyles";
+
 const Home = ({ navigation }) => {
     const [user, dispatch] = useContext(MyUserContext);
 

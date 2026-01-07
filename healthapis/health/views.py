@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
-from health import  paginators
+from health import paginators
 
 
 from health.perms import IsUser, IsExpert, IsConnectionOwnerOrExpert
@@ -58,11 +58,49 @@ class HealthMetricViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
 
     def get_queryset(self):
         # chỉ lấy dữ liệu của user đang đăng nhập
-        return self.queryset.filter(user=self.request.user)
+        today = date.today()
+        DailyHealthMetric.objects.get_or_create(
+            user=self.request.user,
+            date=today,
+            defaults={
+                "active": True
+            }
+        )
+        return DailyHealthMetric.objects.filter(
+            user = self.request.user,
+            active = True,
+        ).order_by('-date')
 
     def perform_create(self, serializer):
         # tự gán user khi POST, ko cần client gửi lên bảo mật
         serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        today = date.today()
+
+        metric, created = DailyHealthMetric.objects.get_or_create(
+            user=request.user,
+            date=today,
+            defaults={
+                "steps": request.data.get("steps", 0),
+                "water_intake": request.data.get("water_intake", 0),
+                "calories_burned": request.data.get("calories_burned", 0),
+            }
+        )
+
+        if not created:
+            metric.steps = request.data.get("steps", metric.steps)
+            metric.water_intake = request.data.get(
+                "water_intake", metric.water_intake
+            )
+            metric.calories_burned = request.data.get(
+                "calories_burned", metric.calories_burned
+            )
+            metric.save()
+
+        serializer = self.get_serializer(metric)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 # kế hoạch tập luyện
@@ -170,8 +208,8 @@ class ExpertUserProfileView(APIView):
     def get(self, request):
         user = request.user
 
-        print (user)
-        print ("hello")
+        print(user)
+        print("hello")
         if user.role != UserRole.EXPERT:
             raise PermissionDenied("Chỉ chuyên gia mới được truy cập")
 
@@ -179,12 +217,11 @@ class ExpertUserProfileView(APIView):
 
         print(connected_user_ids)
 
-
         profiles = HealthProfile.objects.filter(user__id__in=connected_user_ids)
 
         serializer = HealthProfileSerializer(profiles, many=True)
 
-        print (profiles)
+        print(profiles)
         print(serializer.data)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
