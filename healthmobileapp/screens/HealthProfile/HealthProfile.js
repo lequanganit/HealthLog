@@ -321,6 +321,23 @@ const HealthProfile = () => {
             </Card.Content>
           </Card>
 
+          {/* ===== GOAL ===== */}
+          <Card style={{ marginBottom: 16, borderRadius: 14 }}>
+            <Card.Title title="Mục tiêu sức khỏe" />
+            <Card.Content style={{ alignItems: "center" }}>
+              <Text style={{ fontSize: 32, fontWeight: "800" }}>
+                {healthProfile.goal}
+              </Text>
+              <Text
+                style={{
+                  marginTop: 6,
+                  fontWeight: "600",
+                }}
+              >
+              </Text>
+            </Card.Content>
+          </Card>
+
           {/* ===== DAILY METRICS ===== */}
           <Card style={{ marginBottom: 16, borderRadius: 14 }}>
             <Card.Title

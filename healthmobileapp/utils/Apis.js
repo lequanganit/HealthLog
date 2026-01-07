@@ -13,6 +13,7 @@ export const endpoints = {
     'health_journals': '/HealthJournal/',
     'health_profile': '/healthprofiles/',
     'health_metrics': '/health_metrics/',
+    'reminders': '/reminders/',
 };
 
 export const authApis = (token) => {
