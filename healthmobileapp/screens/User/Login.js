@@ -61,11 +61,11 @@ const Login = ({ route }) => {
 
             console.log("TOKEN:", res.data);
 
-            await AsyncStorage.setItem("access_token", res.data.access_token);
+            await AsyncStorage.setItem("access_token", res.data.token);
 
-            await AsyncStorage.setItem("refresh_token", res.data.refresh_token);
+            await AsyncStorage.setItem("refresh_token", res.data.token);
 
-            const u = await authApis(res.data.access_token)
+            const u = await authApis(res.data.token)
                 .get(endpoints['current-user']);
 
             dispatch({
