@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, Modal, } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Modal, Platform, } from "react-native";
 import { TextInput, Button, FAB } from "react-native-paper";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import ReminderStyles from "../../styles/ReminderStyles";
 
 const Reminder = () => {
   const [reminders, setReminders] = useState([]);
@@ -15,7 +17,9 @@ const Reminder = () => {
   const [time, setTime] = useState(""); // HH:mm
   const [describe, setDescribe] = useState("");
 
-  // ================= LOAD =================
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
   const loadReminders = async () => {
     try {
       const token = await AsyncStorage.getItem("access_token");
@@ -30,14 +34,27 @@ const Reminder = () => {
     loadReminders();
   }, []);
 
-  // ================= OPEN MODAL =================
+  // Khi edit reminder
   useEffect(() => {
     if (editingReminder) {
       setTitle(editingReminder.title_name);
 
       const d = new Date(editingReminder.time);
-      setDate(d.toISOString().split("T")[0]); // YYYY-MM-DD
-      setTime(d.toTimeString().slice(0, 5));  // HH:mm
+
+      setDate(
+        d.toLocaleDateString("en-CA", {
+          timeZone: "Asia/Ho_Chi_Minh",
+        })
+      );
+
+      setTime(
+        d.toLocaleTimeString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+      );
 
       setDescribe(editingReminder.describe || "");
     } else {
@@ -48,30 +65,46 @@ const Reminder = () => {
     }
   }, [editingReminder]);
 
-  // ================= CREATE / UPDATE =================
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const d = selectedDate.toLocaleDateString("en-CA");
+      setDate(d);
+    }
+  };
+
+  const onChangeTime = (event, selectedTime) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      const t = selectedTime.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      setTime(t);
+    }
+  };
+
   const saveReminder = async () => {
     try {
       if (!date || !time || !title) return;
 
       const token = await AsyncStorage.getItem("access_token");
 
-      // 🔥 FIX QUAN TRỌNG: dùng ISO 8601 chuẩn DRF
-      const datetimeISO = new Date(`${date} ${time}`).toISOString();
+      const datetimeISO = new Date(`${date}T${time}:00`).toISOString();
 
       const data = {
         title_name: title,
         time: datetimeISO,
-        describe: describe,
+        describe,
       };
 
       if (editingReminder) {
-        // UPDATE
         await authApis(token).put(
           `${endpoints["reminders"]}${editingReminder.id}/`,
           data
         );
       } else {
-        // CREATE
         await authApis(token).post(endpoints["reminders"], data);
       }
 
@@ -83,7 +116,6 @@ const Reminder = () => {
     }
   };
 
-  // ================= RENDER ITEM =================
   const renderItem = ({ item }) => {
     const d = new Date(item.time);
 
@@ -94,23 +126,28 @@ const Reminder = () => {
           setVisible(true);
         }}
       >
-        <View style={styles.card}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.title}>{item.title_name}</Text>
-            <Text style={styles.time}>
-              {d.toLocaleTimeString([], {
+        <View style={ReminderStyles.card}>
+          <View style={ReminderStyles.rowBetween}>
+            <Text style={ReminderStyles.title}>{item.title_name}</Text>
+            <Text style={ReminderStyles.time}>
+              {d.toLocaleTimeString("vi-VN", {
+                timeZone: "Asia/Ho_Chi_Minh",
                 hour: "2-digit",
                 minute: "2-digit",
+                hour12: false,
               })}
             </Text>
           </View>
 
-          <Text style={styles.date}>
-            📅 {d.toLocaleDateString()}
+          <Text style={ReminderStyles.date}>
+            📅{" "}
+            {d.toLocaleDateString("vi-VN", {
+              timeZone: "Asia/Ho_Chi_Minh",
+            })}
           </Text>
 
           {item.describe ? (
-            <Text style={styles.desc}>📝 {item.describe}</Text>
+            <Text style={ReminderStyles.desc}>📝 {item.describe}</Text>
           ) : null}
         </View>
       </TouchableOpacity>
@@ -118,11 +155,11 @@ const Reminder = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Nhắc nhở của tôi</Text>
+    <View style={ReminderStyles.container}>
+      <Text style={ReminderStyles.header}>Nhắc nhở của tôi</Text>
 
       {reminders.length === 0 ? (
-        <Text style={styles.empty}>Chưa có reminder nào</Text>
+        <Text style={ReminderStyles.empty}>Chưa có reminder nào</Text>
       ) : (
         <FlatList
           data={reminders}
@@ -131,21 +168,19 @@ const Reminder = () => {
         />
       )}
 
-      {/* ➕ FAB */}
       <FAB
         icon="plus"
-        style={styles.fab}
+        style={ReminderStyles.fab}
         onPress={() => {
           setEditingReminder(null);
           setVisible(true);
         }}
       />
 
-      {/* MODAL CREATE / EDIT */}
       <Modal visible={visible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>
+        <View style={ReminderStyles.modalOverlay}>
+          <View style={ReminderStyles.modal}>
+            <Text style={ReminderStyles.modalTitle}>
               {editingReminder ? "Chỉnh sửa reminder" : "Tạo reminder"}
             </Text>
 
@@ -153,30 +188,56 @@ const Reminder = () => {
               label="Tiêu đề"
               value={title}
               onChangeText={setTitle}
-              style={styles.input}
+              style={ReminderStyles.input}
             />
 
-            <View style={styles.row}>
+            {/* CHỌN NGÀY */}
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <TextInput
-                label="Ngày (YYYY-MM-DD)"
+                label="Ngày"
                 value={date}
-                onChangeText={setDate}
-                style={[styles.input, styles.half]}
+                editable={false}
+                style={ReminderStyles.input}
+                right={<TextInput.Icon icon="calendar" />}
               />
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={onChangeDate}
+              />
+            )}
+
+            {/* CHỌN GIỜ */}
+            <TouchableOpacity onPress={() => setShowTimePicker(true)}>
               <TextInput
-                label="Giờ (HH:mm)"
+                label="Giờ"
                 value={time}
-                onChangeText={setTime}
-                style={[styles.input, styles.half]}
+                editable={false}
+                style={ReminderStyles.input}
+                right={<TextInput.Icon icon="clock-outline" />}
               />
-            </View>
+            </TouchableOpacity>
+
+            {showTimePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="time"
+                is24Hour={true}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={onChangeTime}
+              />
+            )}
 
             <TextInput
               label="Mô tả"
               value={describe}
               onChangeText={setDescribe}
               multiline
-              style={styles.input}
+              style={ReminderStyles.input}
             />
 
             <Button mode="contained" onPress={saveReminder}>
