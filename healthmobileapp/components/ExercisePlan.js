@@ -17,30 +17,31 @@ const ExercisePlan = () => {
   const navigation = useNavigation();
 
   const [plans, setPlans] = useState([]);
+  const [exercises, setExercises] = useState([]);
+  const [selectedExercises, setSelectedExercises] = useState({});
   const [loading, setLoading] = useState(false);
 
-  // Modal thêm kế hoạch
+  // Modal state
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [totalDuration, setTotalDuration] = useState("60 phút");
   const [note, setNote] = useState("");
-  const [exercises, setExercises] = useState([]);
-  const [selectedExercises, setSelectedExercises] = useState({});
 
-  // Load dữ liệu kế hoạch và bài tập
+  /* ================= LOAD DATA ================= */
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
-      const token = await AsyncStorage.getItem("token");
       try {
-        const plansRes = await authApis(token).get(endpoints.exercises_plans);
-        setPlans(plansRes.data.results || plansRes.data);
+        setLoading(true);
+        const token = await AsyncStorage.getItem("access_token");
 
-        const exercisesRes = await authApis(token).get(endpoints.exercises);
-        setExercises(exercisesRes.data.results || exercisesRes.data);
+        const planRes = await authApis(token).get(endpoints.exercises_plans);
+        setPlans(planRes.data.results || planRes.data);
+
+        const exRes = await authApis(token).get(endpoints.exercises);
+        setExercises(exRes.data.results || exRes.data);
       } catch (err) {
-        console.log(err);
+        console.log(err.response?.data || err.message);
         Alert.alert("Lỗi", "Không tải được dữ liệu");
       } finally {
         setLoading(false);
@@ -49,6 +50,7 @@ const ExercisePlan = () => {
     loadData();
   }, []);
 
+  /* ================= CHỌN / BỎ BÀI TẬP ================= */
   const toggleExercise = (id) => {
     setSelectedExercises((prev) => {
       if (prev[id]) {
@@ -56,18 +58,42 @@ const ExercisePlan = () => {
         delete copy[id];
         return copy;
       }
-      return { ...prev, [id]: { repetitions: 10, duration: 10 } };
+      return {
+        ...prev,
+        [id]: { repetitions: "", duration: "" },
+      };
     });
   };
 
-  const handleAddPlan = async () => {
-    if (!name.trim()) return Alert.alert("Nhập tên kế hoạch");
-    if (!date.trim()) return Alert.alert("Nhập ngày thực hiện kế hoạch (YYYY-MM-DD)");
-    if (Object.keys(selectedExercises).length === 0) return Alert.alert("Chọn ít nhất 1 bài tập");
+  const updateExerciseField = (id, field, value) => {
+    setSelectedExercises((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [field]: value,
+      },
+    }));
+  };
 
-    setLoading(true);
-    const token = await AsyncStorage.getItem("token");
+  /* ================= ADD PLAN ================= */
+  const handleAddPlan = async () => {
+    if (!name.trim()) return Alert.alert("Lỗi", "Chưa nhập tên kế hoạch");
+    if (!date.trim()) return Alert.alert("Lỗi", "Chưa nhập ngày");
+    if (Object.keys(selectedExercises).length === 0)
+      return Alert.alert("Lỗi", "Chọn ít nhất 1 bài tập");
+
+    // validate input
+    for (const exId in selectedExercises) {
+      const ex = selectedExercises[exId];
+      if (!ex.repetitions || !ex.duration) {
+        return Alert.alert("Lỗi", "Nhập đầy đủ số lần và thời gian");
+      }
+    }
+
     try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("access_token");
+
       const planRes = await authApis(token).post(endpoints.exercises_plans, {
         name,
         date,
@@ -76,13 +102,17 @@ const ExercisePlan = () => {
       });
 
       const planId = planRes.data.id;
-      for (const exId of Object.keys(selectedExercises)) {
-        const exData = selectedExercises[exId];
-        await authApis(token).post(`${endpoints.exercises_plans}${planId}/exercises/`, {
-          exercise_id: exId,
-          repetitions: exData.repetitions,
-          duration: exData.duration,
-        });
+
+      for (const exId in selectedExercises) {
+        const ex = selectedExercises[exId];
+        await authApis(token).post(
+          endpoints.add_exercise_to_plan(planId),
+          {
+            exercise_id: Number(exId),
+            repetitions: Number(ex.repetitions),
+            duration: Number(ex.duration),
+          }
+        );
       }
 
       setPlans([planRes.data, ...plans]);
@@ -92,31 +122,30 @@ const ExercisePlan = () => {
       setTotalDuration("60 phút");
       setNote("");
       setSelectedExercises({});
-      Alert.alert("Thành công", "Đã thêm kế hoạch!");
+      Alert.alert("Thành công", "Đã tạo kế hoạch");
     } catch (err) {
       console.log(err.response?.data || err.message);
-      Alert.alert("Thêm thất bại", JSON.stringify(err.response?.data));
+      Alert.alert("Lỗi", "Không thể tạo kế hoạch");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeletePlan = async (planId) => {
-    Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xóa kế hoạch này?", [
+  /* ================= DELETE PLAN ================= */
+  const handleDeletePlan = async (id) => {
+    Alert.alert("Xác nhận", "Xóa kế hoạch này?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Xóa",
         style: "destructive",
         onPress: async () => {
-          setLoading(true);
-          const token = await AsyncStorage.getItem("token");
           try {
-            await authApis(token).delete(`${endpoints.exercises_plans}${planId}/`);
-            setPlans((prev) => prev.filter((p) => p.id !== planId));
-            Alert.alert("Thành công", "Đã xóa kế hoạch!");
-          } catch (err) {
-            console.log(err.response?.data || err.message);
-            Alert.alert("Lỗi", "Xóa kế hoạch thất bại");
+            setLoading(true);
+            const token = await AsyncStorage.getItem("access_token");
+            await authApis(token).delete(`${endpoints.exercises_plans}${id}/`);
+            setPlans((prev) => prev.filter((p) => p.id !== id));
+          } catch {
+            Alert.alert("Lỗi", "Xóa thất bại");
           } finally {
             setLoading(false);
           }
@@ -125,11 +154,7 @@ const ExercisePlan = () => {
     ]);
   };
 
-  const handleViewPlan = (plan) => {
-    // Điều hướng sang màn hình chi tiết
-    navigation.navigate("ExercisePlanDetail", { planId: plan.id });
-  };
-
+  /* ================= UI ================= */
   return (
     <View style={{ flex: 1 }}>
       <Button mode="contained" onPress={() => setModalVisible(true)} style={{ margin: 10 }}>
@@ -139,47 +164,85 @@ const ExercisePlan = () => {
       <FlatList
         data={plans}
         keyExtractor={(item) => item.id.toString()}
-        ListEmptyComponent={!loading && <Text style={{ textAlign: "center", marginTop: 20 }}>Chưa có kế hoạch</Text>}
-        ListFooterComponent={loading && <ActivityIndicator style={{ margin: 20 }} />}
         renderItem={({ item }) => (
           <List.Item
             title={item.name}
-            description={`Ngày: ${item.date || "-"}\nTổng thời lượng: ${item.total_duration}\nGhi chú: ${item.note || "-"}`}
+            description={`Ngày: ${item.date}\nThời lượng: ${item.total_duration}`}
             left={() => <List.Icon icon="calendar" />}
             right={() => (
-              <Button mode="text" onPress={() => handleDeletePlan(item.id)} style={{ alignSelf: "center" }}>
-                Xóa
-              </Button>
+              <Button onPress={() => handleDeletePlan(item.id)}>Xóa</Button>
             )}
-            onPress={() => handleViewPlan(item)}
+            onPress={() =>
+              navigation.navigate("ExercisePlanDetail", { planId: item.id })
+            }
           />
         )}
+        ListEmptyComponent={
+          !loading && <Text style={{ textAlign: "center" }}>Chưa có kế hoạch</Text>
+        }
       />
 
-      {/* Modal thêm kế hoạch */}
+      {/* ============ MODAL ============ */}
       <Modal visible={modalVisible} transparent animationType="fade">
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 10, backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            padding: 10,
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
           <View style={{ backgroundColor: "#fff", padding: 15, borderRadius: 10 }}>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Thêm kế hoạch mới</Text>
+            <Text style={{ fontWeight: "bold" }}>Thêm kế hoạch</Text>
 
-            <TextInput placeholder="Tên kế hoạch" value={name} onChangeText={setName} style={{ borderWidth: 1, marginBottom: 10, padding: 8 }} />
-            <TextInput placeholder="Ngày thực hiện (YYYY-MM-DD)" value={date} onChangeText={setDate} style={{ borderWidth: 1, marginBottom: 10, padding: 8 }} />
-            <TextInput placeholder="Tổng thời lượng" value={totalDuration} onChangeText={setTotalDuration} style={{ borderWidth: 1, marginBottom: 10, padding: 8 }} />
-            <TextInput placeholder="Ghi chú" value={note} onChangeText={setNote} style={{ borderWidth: 1, marginBottom: 10, padding: 8 }} multiline />
+            <TextInput placeholder="Tên kế hoạch" value={name} onChangeText={setName} />
+            <TextInput placeholder="Ngày (YYYY-MM-DD)" value={date} onChangeText={setDate} />
+            <TextInput placeholder="Tổng thời lượng" value={totalDuration} onChangeText={setTotalDuration} />
+            <TextInput placeholder="Ghi chú" value={note} onChangeText={setNote} />
 
-            <Text style={{ fontWeight: "bold", marginBottom: 5 }}>Chọn bài tập:</Text>
-            {exercises.map((ex) => (
-              <View key={ex.id} style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-                <Checkbox status={selectedExercises[ex.id] ? "checked" : "unchecked"} onPress={() => toggleExercise(ex.id)} />
-                <Text>{ex.name}</Text>
-              </View>
-            ))}
+            <Text style={{ fontWeight: "bold", marginTop: 10 }}>Bài tập</Text>
 
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 10 }}>
+            {exercises.map((ex) => {
+              const selected = selectedExercises[ex.id];
+              return (
+                <View key={ex.id} style={{ marginBottom: 10 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Checkbox
+                      status={selected ? "checked" : "unchecked"}
+                      onPress={() => toggleExercise(ex.id)}
+                    />
+                    <Text>{ex.name}</Text>
+                  </View>
+
+                  {selected && (
+                    <View style={{ flexDirection: "row", marginLeft: 40 }}>
+                      <TextInput
+                        placeholder="Số lần"
+                        keyboardType="numeric"
+                        value={selected.repetitions}
+                        onChangeText={(t) =>
+                          updateExerciseField(ex.id, "repetitions", t)
+                        }
+                        style={{ borderWidth: 1, width: 80, marginRight: 10 }}
+                      />
+                      <TextInput
+                        placeholder="Phút"
+                        keyboardType="numeric"
+                        value={selected.duration}
+                        onChangeText={(t) =>
+                          updateExerciseField(ex.id, "duration", t)
+                        }
+                        style={{ borderWidth: 1, width: 80 }}
+                      />
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+
+            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
               <Button onPress={() => setModalVisible(false)}>Hủy</Button>
-              <Button mode="contained" onPress={handleAddPlan} style={{ marginLeft: 5 }}>
-                Thêm
-              </Button>
+              <Button mode="contained" onPress={handleAddPlan}>Thêm</Button>
             </View>
           </View>
         </ScrollView>

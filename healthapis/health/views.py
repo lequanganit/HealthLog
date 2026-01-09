@@ -107,7 +107,7 @@ class HealthMetricViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
 class ExercisePlanViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ExercisePlanSerializer
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ['get', 'post','patch', 'delete']
 
     def get_queryset(self):
         return ExercisePlan.objects.filter(
@@ -193,10 +193,9 @@ class ExerciseView(viewsets.ViewSet,
                    generics.ListAPIView,
                    generics.CreateAPIView,
                    generics.RetrieveAPIView,
-                   generics.UpdateAPIView,
                    generics.DestroyAPIView):
     queryset = Exercise.objects.filter(active=True)
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ['get', 'post',  'delete']
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = paginators.ItemPagination

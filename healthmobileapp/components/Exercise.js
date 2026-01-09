@@ -17,7 +17,7 @@ const Exercise = () => {
     const loadExercises = async () => {
         try {
             setLoading(true);
-            const token = await AsyncStorage.getItem("token");
+            const token = await AsyncStorage.getItem("access_token");
             const res = await authApis(token).get(`${endpoints.exercises}?page=${page}`);
             if (page === 1) setExercises(res.data.results);
             else setExercises(prev => [...prev, ...res.data.results]);
@@ -30,7 +30,7 @@ const Exercise = () => {
     };
     const handleDeleteExercise = async (id) => {
     try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await AsyncStorage.getItem("access_token");
         await authApis(token).delete(`${endpoints.exercises}${id}/`); 
         
         setExercises(prev => prev.filter(item => item.id !== id));
@@ -58,7 +58,7 @@ const Exercise = () => {
         }
         try {
             setAdding(true);
-            const token = await AsyncStorage.getItem("token");
+            const token = await AsyncStorage.getItem("access_token");
             const data = { name: newName, description: newDescription };
             const res = await authApis(token).post(endpoints.exercises, data);
             setExercises(prev => [res.data, ...prev]);

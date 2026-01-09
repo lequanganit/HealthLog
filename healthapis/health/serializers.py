@@ -92,6 +92,7 @@ class AddExerciseToPlanSerializer(serializers.ModelSerializer):
         return ExercisePlant_Exercise.objects.create(
             exercise_plan_id=plan_id,
             exercise_id=exercise_id,
+            active=True,
             **validated_data
         )
 
