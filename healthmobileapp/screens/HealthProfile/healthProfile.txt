@@ -1,0 +1,253 @@
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Text, View, ScrollView, Image } from "react-native";
+import { Card, TextInput, Button } from "react-native-paper";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { authApis, endpoints } from "../../utils/Apis";
+
+/* ================== HELPER ================== */
+const getBmiStatus = (bmi) => {
+  if (!bmi) return "—";
+  if (bmi < 18.5) return "Gầy";
+  if (bmi < 25) return "Bình thường";
+  if (bmi < 30) return "Thừa cân";
+  return "Béo phì";
+};
+
+const getBmiColor = (bmi) => {
+  if (!bmi) return "#9E9E9E";
+  if (bmi < 18.5) return "#03A9F4";
+  if (bmi < 25) return "#4CAF50";
+  if (bmi < 30) return "#FF9800";
+  return "#F44336";
+};
+
+const StatItem = ({ icon, value, label, unit, color }) => (
+  <View style={{ flex: 1, alignItems: "center" }}>
+    <MaterialCommunityIcons name={icon} size={26} color={color} />
+    <Text style={{ fontSize: 22, fontWeight: "800", color }}>
+      {value || 0}
+    </Text>
+    <Text style={{ fontSize: 12, color: "#666" }}>
+      {label} ({unit})
+    </Text>
+  </View>
+);
+
+/* ================== COMPONENT ================== */
+const HealthProfile = () => {
+  const [user, setUser] = useState(null);
+  const [healthProfile, setHealthProfile] = useState(null);
+  const [dailyMetrics, setDailyMetrics] = useState(null);
+  const [showEditDaily, setShowEditDaily] = useState(false);
+
+  const [form, setForm] = useState({
+    steps: "",
+    water_intake: "",
+    calories_burned: "",
+  });
+
+  /* ========== API ========== */
+  const loadUser = async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) return;
+    const res = await authApis(token).get(endpoints["current-user"]);
+    setUser(res.data);
+  };
+
+  const loadHealthProfile = async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) return;
+    const res = await authApis(token).get(endpoints["health_profile"]);
+    setHealthProfile(Array.isArray(res.data) ? res.data[0] : res.data);
+  };
+
+  const loadDailyMetrics = async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) return;
+    const res = await authApis(token).get(endpoints["health_metrics"]);
+    const data = Array.isArray(res.data) ? res.data[0] : res.data;
+    setDailyMetrics(data);
+
+    setForm({
+      steps: String(data?.steps || ""),
+      water_intake: String(data?.water_intake || ""),
+      calories_burned: String(data?.calories_burned || ""),
+    });
+  };
+
+  const submitDailyMetrics = async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) return;
+
+    await authApis(token).post(endpoints["health_metrics"], {
+      steps: Number(form.steps) || 0,
+      water_intake: Number(form.water_intake) || 0,
+      calories_burned: Number(form.calories_burned) || 0,
+    });
+
+    await loadDailyMetrics();
+    setShowEditDaily(false);
+    alert("Cập nhật thành công ✅");
+  };
+
+  useEffect(() => {
+    loadUser();
+    loadHealthProfile();
+    loadDailyMetrics();
+  }, []);
+
+  if (!healthProfile) {
+    return <Text style={{ textAlign: "center", marginTop: 50 }}>Đang tải...</Text>;
+  }
+
+  const bmiColor = getBmiColor(healthProfile.bmi);
+
+  return (
+    <LinearGradient
+      colors={["#caf9ceff", "#ebf1d3ff", "#ffffffff"]}
+      style={{ flex: 1 }}
+    >
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        {/* ===== USER CARD ===== */}
+        <Card style={{ borderRadius: 20, marginBottom: 16, elevation: 4 }}>
+          <Card.Content style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                overflow: "hidden",
+                backgroundColor: "#4CAF50",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {user?.avatar ? (
+                <Image
+                  source={{ uri: `https://res.cloudinary.com/durpn2bki/${user.avatar}` }}
+                  style={{ width: 56, height: 56 }}
+                />
+              ) : (
+                <Text style={{ color: "#fff", fontSize: 22 }}>
+                  {user?.username?.charAt(0)?.toUpperCase()}
+                </Text>
+              )}
+            </View>
+
+            <View style={{ marginLeft: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: "700" }}>
+                {user?.first_name} {user?.last_name}
+              </Text>
+              <Text style={{ color: "#666" }}>@{user?.username}</Text>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* ===== BASIC INFO ===== */}
+        <Card style={{ borderRadius: 20, marginBottom: 16 }}>
+          <Card.Title title="Hồ sơ sức khỏe" />
+          <Card.Content style={{ flexDirection: "row" }}>
+            <StatItem icon="human-male-height" value={healthProfile.height} label="Chiều cao" unit="cm" color="#2196F3" />
+            <StatItem icon="scale" value={healthProfile.weight} label="Cân nặng" unit="kg" color="#FF9800" />
+            <StatItem icon="calendar" value={healthProfile.age} label="Tuổi" unit="tuổi" color="#9C27B0" />
+          </Card.Content>
+        </Card>
+
+        {/* ===== BMI ===== */}
+        <Card style={{ borderRadius: 20, marginBottom: 16 }}>
+          <Card.Title
+            title="Chỉ số BMI"
+            left={() => (
+              <MaterialCommunityIcons
+                name="scale-bathroom"
+                size={26}
+                color={bmiColor}
+              />
+            )}
+          />
+          <Card.Content style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 36, fontWeight: "900", color: bmiColor }}>
+              {healthProfile.bmi}
+            </Text>
+            <View
+              style={{
+                marginTop: 8,
+                paddingHorizontal: 16,
+                paddingVertical: 6,
+                borderRadius: 20,
+                backgroundColor: bmiColor + "22",
+              }}
+            >
+              <Text style={{ color: bmiColor, fontWeight: "700" }}>
+                {getBmiStatus(healthProfile.bmi)}
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* ===== DAILY METRICS ===== */}
+        <Card style={{ borderRadius: 20 }}>
+          <Card.Title
+            title="Chỉ số hôm nay"
+            right={() => (
+              <Button compact onPress={() => setShowEditDaily(!showEditDaily)}>
+                {showEditDaily ? "Hủy" : "Cập nhật"}
+              </Button>
+            )}
+          />
+
+          <Card.Content>
+            {!showEditDaily ? (
+              <View style={{ flexDirection: "row" }}>
+                <StatItem icon="walk" value={dailyMetrics?.steps} label="Bước" unit="steps" color="#4CAF50" />
+                <StatItem icon="cup-water" value={dailyMetrics?.water_intake} label="Nước" unit="ml" color="#2196F3" />
+                <StatItem icon="fire" value={dailyMetrics?.calories_burned} label="Calo" unit="kcal" color="#FF9800" />
+              </View>
+            ) : (
+              <>
+                <TextInput
+                  label="Số bước"
+                  keyboardType="numeric"
+                  value={form.steps}
+                  onChangeText={(t) => setForm({ ...form, steps: t })}
+                  style={{ marginBottom: 10 }}
+                />
+                <TextInput
+                  label="Nước uống (ml)"
+                  keyboardType="numeric"
+                  value={form.water_intake}
+                  onChangeText={(t) => setForm({ ...form, water_intake: t })}
+                  style={{ marginBottom: 10 }}
+                />
+                <TextInput
+                  label="Calo đốt (kcal)"
+                  keyboardType="numeric"
+                  value={form.calories_burned}
+                  onChangeText={(t) => setForm({ ...form, calories_burned: t })}
+                  style={{ marginBottom: 16 }}
+                />
+
+                <LinearGradient
+                  colors={["#66BB6A", "#43A047"]}
+                  style={{ borderRadius: 30 }}
+                >
+                  <Button
+                    mode="contained"
+                    onPress={submitDailyMetrics}
+                    style={{ backgroundColor: "transparent" }}
+                  >
+                    Lưu chỉ số hôm nay
+                  </Button>
+                </LinearGradient>
+              </>
+            )}
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </LinearGradient>
+  );
+};
+
+export default HealthProfile;
