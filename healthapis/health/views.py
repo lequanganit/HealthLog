@@ -1,5 +1,5 @@
 from datetime import datetime, date
-
+from django.utils.timezone import now
 from rest_framework import viewsets, permissions, parsers, status, generics, serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -138,45 +138,15 @@ class ExercisePlanViewSet(viewsets.ModelViewSet):
         )
 
 
-class HealthJournalViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+class HealthJournalViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView):
     serializer_class = HealthJournalSerializer
-    queryset = HealthJournal.objects.filter(active=True)
-
+    permission_classes = [permissions.IsAuthenticated]
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
+        # Lọc bản ghi active của user hiện tại
+        return HealthJournal.objects.filter(user=self.request.user, active=True)
     def perform_create(self, serializer):
-        today = date.today()
-        existing_journal = HealthJournal.objects.filter(
-            user=self.request.user,
-            update_date=today,
-            active=True
-        ).first()
-
-        if existing_journal:
-            serializer.instance = existing_journal
-            serializer.save()
-
-        else:
-            serializer.save(user=self.request.user)
-
-    def create(self, request, *args, **kwargs):
-        today = date.today()
-
-        existing_journal = HealthJournal.objects.filter(
-            user=self.request.user,
-            date=today,
-            active=True
-        ).exists()
-
-        response = super().create(request, *args, **kwargs)
-
-        if existing_journal:
-            response.status_code = status.HTTP_200_OK
-            response.data['message'] = "Đã cập nhật nhật ký ngày hôm nay."
-        return response
-
+        # Gán user hiện tại khi tạo mới
+        serializer.save(user=self.request.user)
 
 class ReminderViewSet(viewsets.ModelViewSet):
     serializer_class = ReminderSerializer

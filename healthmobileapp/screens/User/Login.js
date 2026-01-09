@@ -49,8 +49,8 @@ const Login = ({ route }) => {
             const data = new URLSearchParams();
             data.append("username", user.username);
             data.append("password", user.password);
-            data.append("client_id", "fxGJPzHmHiVphQSJ0eTviLBz5UCiVP4qUUSathjL");
-            data.append("client_secret", "8OvvDFiwi8kHteejHqkGrYKKL9Yz8K7ji9FLqfad4yGdad4tOv1n4txYwRgRTvWjjzbSDGKrLSNsBqodL23SlRJN0S2DbJpVw3i3FdeALo00uZRa2Qmc18521KMwImXK");
+            data.append("client_id", "lOLoyDZLInReEtLer9NuBLefZpwiy1NgGpz2GVQ7");
+            data.append("client_secret", "1i5JrNK8ryHzBwwWV1OpzR3w3I7hGYe8N15AB826o9B6nxa50oIci7NNaf0NNE9ZSBTpP117Kfu4weQleOEL4aNX5ZcKua1b1r2xfDFYTEEZGZcr4AabYjAJrG12Ei3Z");
             data.append("grant_type", "password");
 
             const res = await Apis.post(endpoints['login'], data, {

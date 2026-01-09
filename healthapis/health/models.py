@@ -165,8 +165,9 @@ class ExercisePlant_Exercise(BaseModel):
 
 # nhat ki suc khoe
 class HealthJournal(BaseModel):
-    exercise_plan = models.OneToOneField(ExercisePlan, on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="health_journals", null=True,blank=True)
+    exercise_plan = models.ForeignKey(ExercisePlan,on_delete=models.CASCADE,null=True,blank=True)
     content = models.TextField()
 
     def __str__(self):
-        return f"Nhật ký {self.updated_date}"
+        return f"Nhật ký {self.user} - {self.created_date}"

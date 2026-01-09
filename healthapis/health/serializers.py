@@ -98,8 +98,8 @@ class AddExerciseToPlanSerializer(serializers.ModelSerializer):
 
 class HealthJournalSerializer(serializers.ModelSerializer):
     class Meta:
-        model: HealthJournal
-        fields = ['workout_plan', 'exercise', 'created_date']
+        model = HealthJournal
+        fields = ['id','exercise_plan','content','created_date']
 
 class ReminderSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField()

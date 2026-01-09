@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.1.187:8000/';
+const BASE_URL = 'http://192.168.1.14:8000/';
 // const BASE_URL = 'http://192.168.1.5:8000/';
 
 export const endpoints = {

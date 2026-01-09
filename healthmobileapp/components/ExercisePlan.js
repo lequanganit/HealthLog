@@ -166,7 +166,7 @@ const ExercisePlan = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <List.Item
-            title={item.name}
+            title={`${item.name} (ID: ${item.id})`}
             description={`Ngày: ${item.date}\nThời lượng: ${item.total_duration}`}
             left={() => <List.Icon icon="calendar" />}
             right={() => (

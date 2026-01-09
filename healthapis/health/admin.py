@@ -55,5 +55,5 @@ admin.site.register(DailyHealthMetric)
 admin.site.register(ExercisePlant_Exercise)
 admin.site.register(Connection)
 admin.site.register(Reminder)
-
+admin.site.register(HealthJournal)
 # Register your models here.
