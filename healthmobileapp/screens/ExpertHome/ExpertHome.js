@@ -127,7 +127,7 @@ const ExpertHome = () => {
 
             <TouchableOpacity
                 style={styles.card}
-                onPress={() => navigation.navigate("UserListProfile")}
+                onPress={() => navigation.navigate("ListUserProfile")}
             >
                 <Text style={styles.cardTitle}>👥 Người dùng kết nối</Text>
                 <Text style={styles.cardDesc}>
@@ -141,8 +141,6 @@ const ExpertHome = () => {
 export default ExpertHome;
 const styles = StyleSheet.create({
     container: {
-
-
 
         paddingTop: 65,
         flex: 1,

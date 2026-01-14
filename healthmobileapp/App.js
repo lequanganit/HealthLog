@@ -16,6 +16,7 @@ import MyUserReducer from "./reducers/MyUserReducer";
 import HomeTabs from "./screens/Home/HomeTabs";
 import ExpertChoose from './screens/ExpertChoose/ExpertChoose';
 import ExpertProfile from './screens/Expert/ExpertProfile';
+import ListUserProfile from './screens/Expert/ListUserProfile';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
           <Stack.Screen name="ExercisePlanDetail" component={ExercisePlanDetail} />
           <Stack.Screen name="ExpertChoose" component={ExpertChoose} />
           <Stack.Screen name="ExpertProfile" component={ExpertProfile} />
+          <Stack.Screen name="ListUserProfile" component={ListUserProfile} />
 
         </Stack.Navigator>
 
