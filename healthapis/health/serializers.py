@@ -117,11 +117,23 @@ class ReminderSerializer(serializers.ModelSerializer):
         fields = ['id','user','title_name','time','describe','created_date']
 
 class ConnectionSerializer(serializers.ModelSerializer):
-    expert_info = serializers.SerializerMethodField()
+    expert_info = ExpertSerializer(
+        source="expert",
+        read_only=True
+    )
+    user_info = UserSerializer(
+        source="user",
+        read_only=True
+    )
 
     class Meta:
         model = Connection
-        fields = ['id', 'expert', 'status', 'expert_info']
+        fields = [
+            "id",
+            "status",
+            "expert_info",
+            "user_info"
+        ]
         read_only_fields = ['status']
 
     def get_expert_info(self, obj):
