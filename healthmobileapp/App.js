@@ -14,6 +14,8 @@ import ExercisePlanDetail from './components/ExercisePlanDetail';
 import { MyUserContext } from "./utils/MyContexts";
 import MyUserReducer from "./reducers/MyUserReducer";
 import HomeTabs from "./screens/Home/HomeTabs";
+import ExpertChoose from './screens/ExpertChoose/ExpertChoose';
+import ExpertProfile from './screens/Expert/ExpertProfile';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -23,7 +25,6 @@ export default function App() {
     <MyUserContext.Provider value={[user, dispatch]}>
       <NavigationContainer>
 
-        
 
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Welcome" component={Welcome} />
@@ -31,12 +32,14 @@ export default function App() {
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="ExpertHome" component={ExpertHome} />
           <Stack.Screen name="ChooseMode" component={ChooseMode} />
-          <Stack.Screen name="Home" component={HomeTabs} />
+          <Stack.Screen name="HealthProfile" component={HomeTabs} />
           <Stack.Screen name="ExercisePlanDetail" component={ExercisePlanDetail} />
+          <Stack.Screen name="ExpertChoose" component={ExpertChoose} />
+          <Stack.Screen name="ExpertProfile" component={ExpertProfile} />
 
-          
-        
         </Stack.Navigator>
+
+
       </NavigationContainer>
     </MyUserContext.Provider>
   );

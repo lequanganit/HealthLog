@@ -30,13 +30,13 @@ const Register = () => {
         field: "confirm",
         icon: "eye",
         secureTextEntry: true
-    },{
+    }, {
         title: "Email",
         field: "email",
         icon: "email"
-      }];
+    }];
 
-    const [user, setUser] = useState({ role: "USER"});
+    const [user, setUser] = useState({ role: "USER" });
     const [err, setErr] = useState("");
     const [loading, setLoading] = useState(false);
     const nav = useNavigation();
@@ -52,7 +52,7 @@ const Register = () => {
         } else {
             const result = await ImagePicker.launchImageLibraryAsync();
             if (!result.canceled) {
-                setUser({...user, "avatar": result.assets[0]})
+                setUser({ ...user, "avatar": result.assets[0] })
             }
         }
     }
@@ -62,52 +62,68 @@ const Register = () => {
             setErr(true)
             return false;
         }
-        
-        const passwordRegex =/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
         if (!passwordRegex.test(user.password)) {
-        setErr(
-            "Mật khẩu phải ≥ 8 ký tự, gồm chữ thường, chữ hoa, số và ký tự đặc biệt!"
-        );
-        return false;
-    }
+            setErr(
+                "Mật khẩu phải ≥ 8 ký tự, gồm chữ thường, chữ hoa, số và ký tự đặc biệt!"
+            );
+            return false;
+        }
         setErr(false);
         return true;
     }
 
     const register = async () => {
-        if (validate() === true) {
-                try {
-                    setLoading(true);
-                    let form = new FormData();
-                    for (let key in user)
-                        if (key !== 'confirm') {
-                            if (key === 'avatar') {
-                                form.append(key, {
-                                    uri: user.avatar.uri,
-                                    name: user.avatar.fileName || "avatar.jpg",
-                                    type: user.avatar.mimeType || "image/jpeg"
-                                });
-                            } else
-                                form.append(key, user[key]);
-                        }
-                    console.info(user);
-                    
-                    let res = await Apis.post(endpoints['register'], form, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-                            
-                    if (res.status === 201) {
-                        nav.navigate("Login");
-                    } 
-                } catch (ex) {
-                    console.error(ex);
-                } finally {
-                    setLoading(false);
+        if (!validate()) return;
+
+        try {
+            setLoading(true);
+
+            // ===== STEP 1: CREATE USER =====
+            let form = new FormData();
+            for (let key in user) {
+                if (key !== "confirm") {
+                    if (key === "avatar") {
+                        form.append("avatar", {
+                            uri: user.avatar.uri,
+                            name: "avatar.jpg",
+                            type: "image/jpeg",
+                        });
+                    } else {
+                        form.append(key, user[key]);
+                    }
                 }
+            }
+
+            const resUser = await Apis.post(
+                endpoints["register"],
+                form,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            const createdUser = resUser.data;
+            console.log("USER CREATED:", createdUser);
+
+            // ===== STEP 2: CREATE EXPERT IF NEEDED =====
+            if (createdUser.role === "EXPERT") {
+                const resExpert = await Apis.post(
+                    endpoints["experts"],
+                    { user: createdUser.id }
+                );
+
+                console.log("EXPERT CREATED:", resExpert.data);
+            }
+
+            nav.navigate("Login");
+
+        } catch (err) {
+            console.error("REGISTER ERROR:", err.response?.data || err);
+        } finally {
+            setLoading(false);
         }
-    }
+    };
+
 
     return (
         <View style={MyStyles.padding}>
@@ -116,16 +132,16 @@ const Register = () => {
                 <HelperText type="error" visible={!!err}>
                     {err}
                 </HelperText>
-                
-                {info.map(i => <TextInput key={i.field} style={MyStyles.margin} value={user[i.field]} onChangeText={(t) => setUser({...user, [i.field]: t})}
-                                    label={i.title}
-                                    secureTextEntry={i.secureTextEntry}
-                                    right={<TextInput.Icon icon={i.icon} />}
-                                    />)}
+
+                {info.map(i => <TextInput key={i.field} style={MyStyles.margin} value={user[i.field]} onChangeText={(t) => setUser({ ...user, [i.field]: t })}
+                    label={i.title}
+                    secureTextEntry={i.secureTextEntry}
+                    right={<TextInput.Icon icon={i.icon} />}
+                />)}
 
                 <Text style={MyStyles.margin}>Vai trò</Text>
                 <View
-                    style={{borderWidth: 1,borderColor: "#ccc",borderRadius: 5,marginBottom: 10}}
+                    style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 5, marginBottom: 10 }}
                 >
                     <Picker selectedValue={user.role} onValueChange={(value) => setUser({ ...user, role: value })}>
                         {roles.map(r => (
@@ -140,12 +156,12 @@ const Register = () => {
 
                 <TouchableOpacity style={MyStyles.margin} onPress={pickImage}>
                     <Text>Chọn ảnh đại diện...</Text>
-                </TouchableOpacity>    
+                </TouchableOpacity>
 
-                {user.avatar && <Image source={{uri: user.avatar.uri}} style={MyStyles.avatar} />}
+                {user.avatar && <Image source={{ uri: user.avatar.uri }} style={MyStyles.avatar} />}
 
                 <Button loading={loading} disabled={loading} style={MyStyles.margin} icon="account" mode="contained" onPress={register}>
-                   Đăng ký
+                    Đăng ký
                 </Button>
 
             </ScrollView>

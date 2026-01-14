@@ -49,31 +49,42 @@ const Login = ({ route }) => {
             const data = new URLSearchParams();
             data.append("username", user.username);
             data.append("password", user.password);
-            data.append("client_id", "lOLoyDZLInReEtLer9NuBLefZpwiy1NgGpz2GVQ7");
-            data.append("client_secret", "1i5JrNK8ryHzBwwWV1OpzR3w3I7hGYe8N15AB826o9B6nxa50oIci7NNaf0NNE9ZSBTpP117Kfu4weQleOEL4aNX5ZcKua1b1r2xfDFYTEEZGZcr4AabYjAJrG12Ei3Z");
+            data.append("client_id", "aJs2DrCtueOnNpvwpJVe12U0ZU21FTqBknERyUNO");
+            data.append("client_secret", "qhCyLjsGlHORVIQqVBBiYrNA9FTXEtW3uCfKuqGAOqOeFmWUDeqgIpyGBV2MthQNKbCfO2krFRgA6ri9oaLtvRdbXqPpGM5LKn2ysqi7GDjTHRSd92lYhRbsjt5O30v8");
             data.append("grant_type", "password");
 
+            // 1️⃣ LOGIN → GET TOKEN
             const res = await Apis.post(endpoints['login'], data, {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
             });
 
-            console.log("TOKEN:", res.data);
-
             await AsyncStorage.setItem("access_token", res.data.access_token);
-
             await AsyncStorage.setItem("refresh_token", res.data.refresh_token);
 
+            // 2️⃣ GET CURRENT USER
             const u = await authApis(res.data.access_token)
                 .get(endpoints['current-user']);
 
+            // 3️⃣ SAVE TO CONTEXT
             dispatch({
                 type: "login",
                 payload: u.data
             });
 
-            nav.navigate("ChooseMode");
+            // 4️⃣ CHECK ROLE → NAVIGATE
+            if (u.data.role === "EXPERT") {
+                nav.reset({
+                    index: 0,
+                    routes: [{ name: "ExpertHome" }]
+                });
+            } else {
+                nav.reset({
+                    index: 0,
+                    routes: [{ name: "ChooseMode" }]
+                });
+            }
 
         } catch (err) {
             console.log("LOGIN ERROR:", err.response?.data);
@@ -82,6 +93,7 @@ const Login = ({ route }) => {
             setLoading(false);
         }
     };
+
 
     return (
         <View style={MyStyles.padding}>

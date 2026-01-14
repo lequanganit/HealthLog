@@ -1,412 +1,243 @@
-import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image
+} from "react-native";
+import { useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, ScrollView, Image } from "react-native";
-import { Card, TextInput, Button, RadioButton } from "react-native-paper";
-import { authApis, endpoints } from "../../utils/Apis";
+import { useNavigation } from "@react-navigation/native";
 
-/* ================= BMI HELPERS ================= */
-const getBmiStatus = (bmi) => {
-  if (!bmi) return "Chưa có";
-  if (bmi < 18.5) return "Gầy";
-  if (bmi < 25) return "Bình thường";
-  if (bmi < 30) return "Thừa cân";
-  return "Béo phì";
-};
+import { MyUserContext } from "../../utils/MyContexts";
 
-const getBmiColor = (bmi) => {
-  if (!bmi) return "#999";
-  if (bmi < 18.5) return "#2196f3";
-  if (bmi < 25) return "#4caf50";
-  if (bmi < 30) return "#ff9800";
-  return "#f44336";
-};
+const ExpertHome = () => {
+  const [user, dispatch] = useContext(MyUserContext);
+  const navigation = useNavigation();
 
-const GENDER_OPTIONS = [
-  { label: "Nam", value: "MALE" },
-  { label: "Nữ", value: "FEMALE" },
-  { label: "Khác", value: "OTHER" },
-];
+  const logout = async () => {
+    await AsyncStorage.multiRemove([
+      "access_token",
+      "refresh_token"
+    ]);
 
+    dispatch({ type: "logout" });
 
-const GOAL_OPTIONS = [
-  { label: "Giảm cân", value: "WEIGHT_LOSS" },
-  { label: "Tăng cân", value: "WEIGHT_GAIN" },
-  { label: "Giữ dáng", value: "MAINTAINING" },
-];
-
-/* ================= COMPONENT ================= */
-const HealthProfile = () => {
-  const [user, setUser] = useState(null);
-  const [healthProfile, setHealthProfile] = useState(null);
-  const [dailyHealthMetrics, setDailyHealthMetrics] = useState(null);
-
-  const [showEditDaily, setShowEditDaily] = useState(false);
-  const [creatingProfile, setCreatingProfile] = useState(false);
-
-  /* ===== FORM CREATE PROFILE ===== */
-  const [createForm, setCreateForm] = useState({
-    height: "",
-    weight: "",
-    age: "",
-    gender: "MALE",
-    goal: "MAINTAIN",
-  });
-
-  /* ===== FORM DAILY METRICS ===== */
-  const [dailyForm, setDailyForm] = useState({
-    steps: "",
-    water_intake: "",
-    calories_burned: "",
-  });
-
-  /* ================= LOADERS ================= */
-  const loadUser = async () => {
-    const token = await AsyncStorage.getItem("access_token");
-    if (!token) return;
-
-    const res = await authApis(token).get(endpoints["current-user"]);
-    setUser(res.data);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Login" }]
+    });
   };
 
-  const loadHealthProfile = async () => {
-    const token = await AsyncStorage.getItem("access_token");
-    if (!token) return;
+  const fullName =
+    user?.first_name || user?.last_name
+      ? `${user.first_name} ${user.last_name}`
+      : user?.username;
 
-    const res = await authApis(token).get(endpoints["health_profile"]);
-    const profile = Array.isArray(res.data) ? res.data[0] : res.data;
+  const avatarUrl = user?.avatar
+    ? `https://res.cloudinary.com/durpn2bki/image/upload/${user.avatar}`
+    : null;
 
-    setHealthProfile(profile || null);
-  };
-
-  const loadDailyHealthMetrics = async () => {
-    const token = await AsyncStorage.getItem("access_token");
-    if (!token) return;
-
-    const res = await authApis(token).get(endpoints["health_metrics"]);
-    const todayMetric = Array.isArray(res.data) ? res.data[0] : res.data;
-
-    setDailyHealthMetrics(todayMetric || null);
-  };
-
-  /* ================= CREATE PROFILE ================= */
-  const submitHealthProfile = async () => {
-    try {
-      const token = await AsyncStorage.getItem("access_token");
-      if (!token) return;
-
-      setCreatingProfile(true);
-
-      const payload = {
-        height: Number(createForm.height),
-        weight: Number(createForm.weight),
-        age: Number(createForm.age),
-        gender: createForm.gender, // ENUM
-        goal: createForm.goal,     // ENUM
-      };
-
-      await authApis(token).post(endpoints["health_profile"], payload);
-
-      await loadHealthProfile();
-      alert("Tạo hồ sơ sức khỏe thành công ✅");
-    } catch (err) {
-      console.log("CREATE PROFILE ERROR:", err.response?.data);
-      console.log("STATUS:", err.response?.status);
-      alert(JSON.stringify(err.response?.data));
-    }
-    finally {
-      setCreatingProfile(false);
-    }
-  };
-
-  /* ================= DAILY METRICS ================= */
-  useEffect(() => {
-    if (dailyHealthMetrics) {
-      setDailyForm({
-        steps: String(dailyHealthMetrics.steps || ""),
-        water_intake: String(dailyHealthMetrics.water_intake || ""),
-        calories_burned: String(dailyHealthMetrics.calories_burned || ""),
-      });
-    }
-  }, [dailyHealthMetrics]);
-
-  const submitDailyMetrics = async () => {
-    try {
-      const token = await AsyncStorage.getItem("access_token");
-      if (!token) return;
-
-      const payload = {
-        steps: Number(dailyForm.steps) || 0,
-        water_intake: Number(dailyForm.water_intake) || 0,
-        calories_burned: Number(dailyForm.calories_burned) || 0,
-      };
-
-      await authApis(token).post(endpoints["health_metrics"], payload);
-
-      await loadDailyHealthMetrics();
-      setShowEditDaily(false);
-
-      alert("Cập nhật thành công ✅");
-    } catch (err) {
-      alert("Cập nhật thất bại ❌");
-    }
-  };
-
-  /* ================= INIT ================= */
-  useEffect(() => {
-    loadUser();
-    loadHealthProfile();
-    loadDailyHealthMetrics();
-  }, []);
-
-  /* ================= RENDER ================= */
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#f6f7e4ff", padding: 16 }}>
-      {/* ========== CREATE PROFILE ========== */}
-      {!healthProfile ? (
-        <Card style={{ borderRadius: 14 }}>
-          <Card.Title title="Tạo hồ sơ sức khỏe" />
-          <Card.Content>
-            <TextInput
-              label="Chiều cao (cm)"
-              keyboardType="numeric"
-              value={createForm.height}
-              onChangeText={(t) =>
-                setCreateForm({ ...createForm, height: t })
-              }
-              style={{ marginBottom: 12 }}
+    <View style={styles.container}>
+      {/* ===== HEADER ===== */}
+      <View style={styles.header}>
+        <View style={styles.avatarWrapper}>
+          {avatarUrl ? (
+            <Image
+              source={{ uri: avatarUrl }}
+              style={styles.avatar}
             />
-
-            <TextInput
-              label="Cân nặng (kg)"
-              keyboardType="numeric"
-              value={createForm.weight}
-              onChangeText={(t) =>
-                setCreateForm({ ...createForm, weight: t })
-              }
-              style={{ marginBottom: 12 }}
-            />
-
-            <TextInput
-              label="Tuổi"
-              keyboardType="numeric"
-              value={createForm.age}
-              onChangeText={(t) =>
-                setCreateForm({ ...createForm, age: t })
-              }
-              style={{ marginBottom: 12 }}
-            />
-            <Text style={{ fontWeight: "600", marginBottom: 6 }}>Giới tính</Text>
-            <RadioButton.Group
-              onValueChange={(value) =>
-                setCreateForm({ ...createForm, gender: value })
-              }
-              value={createForm.gender}
-            >
-              {GENDER_OPTIONS.map((item) => (
-                <View
-                  key={item.value}
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <RadioButton value={item.value} />
-                  <Text>{item.label}</Text>
-                </View>
-              ))}
-            </RadioButton.Group>
-            <Text style={{ fontWeight: "600", marginTop: 12, marginBottom: 6 }}>
-              Mục tiêu
+          ) : (
+            <Text style={styles.avatarText}>
+              {user?.username
+                ?.charAt(0)
+                ?.toUpperCase()}
             </Text>
+          )}
+        </View>
 
-            <RadioButton.Group
-              onValueChange={(value) =>
-                setCreateForm({ ...createForm, goal: value })
-              }
-              value={createForm.goal}
-            >
-              {GOAL_OPTIONS.map((item) => (
-                <View
-                  key={item.value}
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <RadioButton value={item.value} />
-                  <Text>{item.label}</Text>
-                </View>
-              ))}
-            </RadioButton.Group>
+        <View>
+          <Text style={styles.name}>
+            {fullName}
+          </Text>
+          <Text style={styles.role}>
+            Chuyên gia
+          </Text>
+        </View>
+      </View>
 
-            <Button
-              mode="contained"
-              style={{ marginTop: 16 }}
-              onPress={submitHealthProfile}
-            >
-              Lưu hồ sơ
-            </Button>
+      {/* ===== STATS ===== */}
+      <View style={styles.stats}>
+        <View style={styles.statBox}>
+          <Text style={styles.statNumber}>
+            {user?.expert?.experience_year || 0}+
+          </Text>
+          <Text style={styles.statLabel}>
+            Năm kinh nghiệm
+          </Text>
+        </View>
 
-          </Card.Content>
-        </Card>
-      ) : (
-        <>
-          {/* ===== USER INFO ===== */}
-          <Card style={{ marginBottom: 16, borderRadius: 14 }}>
-            <Card.Content style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
-                  overflow: "hidden",
-                  backgroundColor: "#6200ee",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {user?.avatar ? (
-                  <Image
-                    source={{
-                      uri: `https://res.cloudinary.com/durpn2bki/${user.avatar}`,
-                    }}
-                    style={{ width: 56, height: 56 }}
-                  />
-                ) : (
-                  <Text style={{ color: "#fff", fontSize: 22 }}>
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </Text>
-                )}
-              </View>
+        <View style={styles.statBox}>
+          <Text style={styles.statNumber}>
+            {user?.expert?.connection_count || 0}
+          </Text>
+          <Text style={styles.statLabel}>
+            Người dùng
+          </Text>
+        </View>
+      </View>
 
-              <View style={{ marginLeft: 16 }}>
-                <Text style={{ fontSize: 18, fontWeight: "700" }}>
-                  {user?.first_name} {user?.last_name}
-                </Text>
-                <Text style={{ color: "#777" }}>@{user?.username}</Text>
-              </View>
-            </Card.Content>
-          </Card>
+      {/* ===== ACTIONS ===== */}
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() =>
+          navigation.navigate("ExpertProfile")
+        }
+      >
+        <Text style={styles.cardTitle}>
+          🧑‍⚕️ Hồ sơ chuyên gia
+        </Text>
+        <Text style={styles.cardDesc}>
+          Thông tin chuyên môn & kinh nghiệm
+        </Text>
+      </TouchableOpacity>
 
-          {/* ===== BASIC INFO ===== */}
-          <Card style={{ marginBottom: 16, borderRadius: 14 }}>
-            <Card.Title title="Thông tin cơ bản" />
-            <Card.Content style={{ flexDirection: "row" }}>
-              {[
-                ["Chiều cao", healthProfile.height, "cm"],
-                ["Cân nặng", healthProfile.weight, "kg"],
-                ["Tuổi", healthProfile.age, "tuổi"],
-              ].map(([label, value, unit], i) => (
-                <View key={i} style={{ flex: 1, alignItems: "center" }}>
-                  <Text style={{ color: "#666" }}>{label}</Text>
-                  <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                    {value}
-                  </Text>
-                  <Text>{unit}</Text>
-                </View>
-              ))}
-            </Card.Content>
-          </Card>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() =>
+          navigation.navigate("UserListProfile")
+        }
+      >
+        <Text style={styles.cardTitle}>
+          👥 Người dùng kết nối
+        </Text>
+        <Text style={styles.cardDesc}>
+          Quản lý hồ sơ người dùng
+        </Text>
+      </TouchableOpacity>
 
-          {/* ===== BMI ===== */}
-          <Card style={{ marginBottom: 16, borderRadius: 14 }}>
-            <Card.Title title="Chỉ số BMI" />
-            <Card.Content style={{ alignItems: "center" }}>
-              <Text style={{ fontSize: 32, fontWeight: "800" }}>
-                {healthProfile.bmi}
-              </Text>
-              <Text
-                style={{
-                  marginTop: 6,
-                  fontWeight: "600",
-                  color: getBmiColor(healthProfile.bmi),
-                }}
-              >
-                {getBmiStatus(healthProfile.bmi)}
-              </Text>
-            </Card.Content>
-          </Card>
-
-          {/* ===== GOAL ===== */}
-          <Card style={{ marginBottom: 16, borderRadius: 14 }}>
-            <Card.Title title="Mục tiêu sức khỏe" />
-            <Card.Content style={{ alignItems: "center" }}>
-              <Text style={{ fontSize: 32, fontWeight: "800" }}>
-                {healthProfile.goal}
-              </Text>
-              <Text
-                style={{
-                  marginTop: 6,
-                  fontWeight: "600",
-                }}
-              >
-              </Text>
-            </Card.Content>
-          </Card>
-
-          {/* ===== DAILY METRICS ===== */}
-          <Card style={{ marginBottom: 16, borderRadius: 14 }}>
-            <Card.Title
-              title="Chỉ số hôm nay"
-              right={() => (
-                <Button onPress={() => setShowEditDaily(!showEditDaily)} compact>
-                  {showEditDaily ? "Hủy" : "Cập nhật"}
-                </Button>
-              )}
-            />
-
-            <Card.Content>
-              {!showEditDaily ? (
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  {[
-                    ["Số bước", dailyHealthMetrics?.steps, "bước"],
-                    ["Nước uống", dailyHealthMetrics?.water_intake, "ml"],
-                    ["Calo đốt", dailyHealthMetrics?.calories_burned, "kcal"],
-                  ].map(([label, value, unit], i) => (
-                    <View key={i} style={{ flex: 1, alignItems: "center" }}>
-                      <Text style={{ fontSize: 20, fontWeight: "700" }}>
-                        {value || 0}
-                      </Text>
-                      <Text>{unit}</Text>
-                      <Text style={{ color: "#666" }}>{label}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : (
-                <>
-                  <TextInput
-                    label="Số bước"
-                    keyboardType="numeric"
-                    value={dailyForm.steps}
-                    onChangeText={(t) =>
-                      setDailyForm({ ...dailyForm, steps: t })
-                    }
-                    style={{ marginBottom: 10 }}
-                  />
-                  <TextInput
-                    label="Lượng nước (ml)"
-                    keyboardType="numeric"
-                    value={dailyForm.water_intake}
-                    onChangeText={(t) =>
-                      setDailyForm({ ...dailyForm, water_intake: t })
-                    }
-                    style={{ marginBottom: 10 }}
-                  />
-                  <TextInput
-                    label="Calo đốt (kcal)"
-                    keyboardType="numeric"
-                    value={dailyForm.calories_burned}
-                    onChangeText={(t) =>
-                      setDailyForm({ ...dailyForm, calories_burned: t })
-                    }
-                    style={{ marginBottom: 16 }}
-                  />
-
-                  <Button mode="contained" onPress={submitDailyMetrics}>
-                    Lưu chỉ số hôm nay
-                  </Button>
-                </>
-              )}
-            </Card.Content>
-          </Card>
-        </>
-      )}
-    </ScrollView>
+      {/* ===== LOGOUT ===== */}
+      <TouchableOpacity
+        style={styles.logout}
+        onPress={logout}
+      >
+        <Text style={styles.logoutText}>
+          Đăng xuất
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
-export default HealthProfile;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f4f6fb",
+    padding: 20
+  },
+
+  /* ===== HEADER ===== */
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24
+  },
+
+  avatarWrapper: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#4f46e5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16
+  },
+
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28
+  },
+
+  avatarText: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "700"
+  },
+
+  name: {
+    fontSize: 20,
+    fontWeight: "700"
+  },
+
+  role: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 2
+  },
+
+  /* ===== STATS ===== */
+  stats: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24
+  },
+
+  statBox: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    alignItems: "center",
+    marginHorizontal: 6,
+    elevation: 2
+  },
+
+  statNumber: {
+    fontSize: 22,
+    fontWeight: "700"
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+    textAlign: "center"
+  },
+
+  /* ===== CARD ===== */
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 3
+  },
+
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600"
+  },
+
+  cardDesc: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 6
+  },
+
+  /* ===== LOGOUT ===== */
+  logout: {
+    marginTop: "auto",
+    alignItems: "center",
+    paddingVertical: 12
+  },
+
+  logoutText: {
+    color: "#999",
+    fontSize: 14
+  }
+});
+
+
+export default ExpertHome;

@@ -5,6 +5,8 @@ import ExercisePlanScreen from "../ExercisePlan/ExercisePlanScreen";
 import ExerciseScreen from "../Exercise/ExerciseScreen";
 import Reminder from "../Reminder/Reminder";
 import HealthJournal from "../HealthJournal/HealthJournal";
+import StatisticalData from "../StatisticalData/StatisticalData";
+
 import Logout from "../User/Logout";
 import { Icon } from 'react-native-paper';
 const Tab = createBottomTabNavigator();
@@ -35,12 +37,12 @@ const HomeTabs = () => {
             <Tab.Screen
                 name="Kế hoạch tập luyện"
                 component={ExercisePlanScreen}
-                options={{ title: "Kế hoạch tập luyện", tabBarIcon: () => <Icon source="calendar-text-outline" size={30} color="blue" />  }}
+                options={{ title: "Kế hoạch tập luyện", tabBarIcon: () => <Icon source="calendar-text-outline" size={30} color="blue" /> }}
             />
             <Tab.Screen
                 name="Bài tập"
                 component={ExerciseScreen}
-                options={{ title: "Bài tập", tabBarIcon: () => <Icon source="calendar-edit-outline" size={30} color="blue" />  }}
+                options={{ title: "Bài tập", tabBarIcon: () => <Icon source="calendar-edit-outline" size={30} color="blue" /> }}
             />
             <Tab.Screen
                 name="Nhắc nhở"
@@ -50,7 +52,12 @@ const HomeTabs = () => {
             <Tab.Screen
                 name="Nhật kí sức khỏe"
                 component={HealthJournal}
-                options={{ title: "Nhật kí sức khỏe", tabBarIcon: () => <Icon source="pen" size={30} color="blue" />  }}
+                options={{ title: "Nhật kí sức khỏe", tabBarIcon: () => <Icon source="pen" size={30} color="blue" /> }}
+            />
+            <Tab.Screen
+                name="Thống kê sức khỏe"
+                component={StatisticalData}
+                options={{ title: "Thống kê sức khỏe", tabBarIcon: () => <Icon source="chart-bar" size={30} color="blue" /> }}
             />
             <Tab.Screen
                 name="Logout"
