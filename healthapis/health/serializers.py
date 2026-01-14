@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'avatar', 'role', 'username', 'password')
+        fields = ('id','first_name', 'last_name', 'email', 'avatar', 'role', 'username', 'password')
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -24,15 +24,23 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 class ExpertSerializer(serializers.ModelSerializer):
-    pass
+    class Meta:
+        model = Expert
+        fields = ["id", "user", "expertise", "experience_year"]
 
-    def validate(self, attrs):
-        user = attrs['user']
+    def validate_user(self, user):
         if user.role != UserRole.EXPERT:
             raise serializers.ValidationError(
-                "This account is not an expert"
+                "User must have role EXPERT"
             )
-        return attrs
+
+        if Expert.objects.filter(user=user).exists():
+            raise serializers.ValidationError(
+                "Expert already exists for this user"
+            )
+
+        return user
+
 
 
 class HealthProfileSerializer(serializers.ModelSerializer):
@@ -109,7 +117,16 @@ class ReminderSerializer(serializers.ModelSerializer):
         fields = ['id','user','title_name','time','describe','created_date']
 
 class ConnectionSerializer(serializers.ModelSerializer):
+    expert_info = serializers.SerializerMethodField()
+
     class Meta:
         model = Connection
-        fields = ['id', 'user', 'expert', 'status', ]
-        read_only_fields = ['user', 'status']
+        fields = ['id', 'expert', 'status', 'expert_info']
+        read_only_fields = ['status']
+
+    def get_expert_info(self, obj):
+        return {
+            "id": obj.expert.id,
+            "username": obj.expert.user.username,
+            "expertise": obj.expert.expertise,
+        }

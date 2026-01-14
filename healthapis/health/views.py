@@ -2,10 +2,12 @@ from datetime import datetime, date
 from django.utils.timezone import now
 from rest_framework import viewsets, permissions, parsers, status, generics, serializers
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+
 from health import paginators
 
 
@@ -15,7 +17,7 @@ from health.models import User, HealthProfile, DailyHealthMetric, ExercisePlan, 
     ExercisePlant_Exercise, Connection, UserRole, Expert
 from health.serializers import UserSerializer, HealthProfileSerializer, HealthMetricSerializer, ExercisePlanSerializer, \
     HealthJournalSerializer, ReminderSerializer, ExerciseSerializer, ExerciseInPlanSerializer, \
-    AddExerciseToPlanSerializer, ConnectionSerializer
+    AddExerciseToPlanSerializer, ConnectionSerializer, ExpertSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet, generics.GenericAPIView):
@@ -102,7 +104,6 @@ class HealthMetricViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Creat
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 # kế hoạch tập luyện
 class ExercisePlanViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -171,52 +172,32 @@ class ExerciseView(viewsets.ViewSet,
     pagination_class = paginators.ItemPagination
 
 
-class ExpertUserProfileView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class ExpertViewSet(viewsets.ModelViewSet):
+    queryset = Expert.objects.all()
+    serializer_class = ExpertSerializer
 
-    def get(self, request):
-        user = request.user
-
-        print(user)
-        print("hello")
-        if user.role != UserRole.EXPERT:
-            raise PermissionDenied("Chỉ chuyên gia mới được truy cập")
-
-        connected_user_ids = Expert.objects.filter(user=user)
-
-        print(connected_user_ids)
-
-        profiles = HealthProfile.objects.filter(user__id__in=connected_user_ids)
-
-        serializer = HealthProfileSerializer(profiles, many=True)
-
-        print(profiles)
-        print(serializer.data)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_permissions(self):
+        if self.action == "create":
+            return [AllowAny()]
+        return super().get_permissions()
 
 
-class ConnectionViewSet(viewsets.ModelViewSet):
+
+class ConnectionViewSet(ModelViewSet):
     serializer_class = ConnectionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'USER':
-            return Connection.objects.filter(user=user)
-        return Connection.objects.filter(expert__user=user)
+        print("USER:", user, user.role)
 
-    def perform_create(self, serializer):
-        if self.request.user.role != 'USER':
-            raise PermissionDenied("Chỉ USER được tạo kết nối")
-        serializer.save(user=self.request.user)
+        if user.role == UserRole.EXPERT:
+            expert = Expert.objects.filter(user=user).first()
+            print("EXPERT:", expert)
 
-    def get_permissions(self):
-        if self.action == 'create':
-            return [IsUser()]
-        if self.action == 'partial_update':
-            return [IsExpert()]
-        if self.action in ['retrieve', 'destroy']:
-            return [permissions.IsAuthenticated(), IsConnectionOwnerOrExpert()]
-        return super().get_permissions()
+            qs = Connection.objects.filter(expert=expert)
+            print("CONNECTIONS:", qs)
+
+            return qs
+
+        return Connection.objects.filter(user=user)

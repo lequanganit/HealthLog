@@ -49,16 +49,12 @@ class User(AbstractUser, BaseModel):
 
 class Expert(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    expertise = models.CharField(max_length=30,choices=Expertise.choices, default=Expertise.MAINTAINING)
+    expertise = models.CharField(
+        max_length=30,
+        choices=Expertise.choices,
+        default=Expertise.MAINTAINING
+    )
     experience_year = models.IntegerField(default=0)
-
-    def clean(self):
-        if self.user.role != UserRole.EXPERT:
-            raise ValidationError("User must have role EXPERT")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.username} - {self.expertise}"
