@@ -19,7 +19,6 @@ const ExpertProfile = () => {
 
     return (
         <ScrollView style={styles.container}>
-            {/* ===== HEADER ===== */}
             <View style={styles.header}>
                 <View style={styles.avatarWrapper}>
                     {avatarUrl ? (
@@ -47,7 +46,6 @@ const ExpertProfile = () => {
                 </Text>
             </View>
 
-            {/* ===== USER INFO ===== */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>
                     👤 Thông tin tài khoản
@@ -68,7 +66,6 @@ const ExpertProfile = () => {
                 />
             </View>
 
-            {/* ===== EXPERT INFO ===== */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>
                     🧑‍⚕️ Thông tin chuyên gia
@@ -93,7 +90,6 @@ const ExpertProfile = () => {
                 />
             </View>
 
-            {/* ===== ACTION ===== */}
             <Button
                 mode="contained"
                 style={styles.btn}
@@ -114,7 +110,6 @@ const styles = StyleSheet.create({
         padding: 20
     },
 
-    /* ===== HEADER ===== */
     header: {
         alignItems: "center",
         marginBottom: 24
@@ -153,7 +148,6 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
 
-    /* ===== SECTION ===== */
     section: {
         backgroundColor: "#fff",
         borderRadius: 16,

@@ -13,8 +13,8 @@ const Reminder = () => {
   const [editingReminder, setEditingReminder] = useState(null);
 
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(""); // YYYY-MM-DD
-  const [time, setTime] = useState(""); // HH:mm
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [describe, setDescribe] = useState("");
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -34,7 +34,6 @@ const Reminder = () => {
     loadReminders();
   }, []);
 
-  // Khi edit reminder
   useEffect(() => {
     if (editingReminder) {
       setTitle(editingReminder.title_name);
@@ -191,7 +190,6 @@ const Reminder = () => {
               style={ReminderStyles.input}
             />
 
-            {/* CHỌN NGÀY */}
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <TextInput
                 label="Ngày"
@@ -211,7 +209,6 @@ const Reminder = () => {
               />
             )}
 
-            {/* CHỌN GIỜ */}
             <TouchableOpacity onPress={() => setShowTimePicker(true)}>
               <TextInput
                 label="Giờ"

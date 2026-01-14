@@ -2,9 +2,9 @@ import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      marginTop: 60
+        flex: 1,
+        backgroundColor: '#fff',
+        marginTop: 60
     },
     row: {
         flexDirection: "row",
@@ -17,7 +17,7 @@ export default StyleSheet.create({
         padding: 20,
         paddingTop: 90
 
-        
+
     },
     avatar: {
         width: 120,

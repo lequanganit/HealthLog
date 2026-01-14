@@ -21,14 +21,12 @@ const ExercisePlan = () => {
   const [selectedExercises, setSelectedExercises] = useState({});
   const [loading, setLoading] = useState(false);
 
-  // Modal state
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [totalDuration, setTotalDuration] = useState("60 phút");
   const [note, setNote] = useState("");
 
-  /* ================= LOAD DATA ================= */
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -50,7 +48,6 @@ const ExercisePlan = () => {
     loadData();
   }, []);
 
-  /* ================= CHỌN / BỎ BÀI TẬP ================= */
   const toggleExercise = (id) => {
     setSelectedExercises((prev) => {
       if (prev[id]) {
@@ -75,14 +72,12 @@ const ExercisePlan = () => {
     }));
   };
 
-  /* ================= ADD PLAN ================= */
   const handleAddPlan = async () => {
     if (!name.trim()) return Alert.alert("Lỗi", "Chưa nhập tên kế hoạch");
     if (!date.trim()) return Alert.alert("Lỗi", "Chưa nhập ngày");
     if (Object.keys(selectedExercises).length === 0)
       return Alert.alert("Lỗi", "Chọn ít nhất 1 bài tập");
 
-    // validate input
     for (const exId in selectedExercises) {
       const ex = selectedExercises[exId];
       if (!ex.repetitions || !ex.duration) {
@@ -131,7 +126,6 @@ const ExercisePlan = () => {
     }
   };
 
-  /* ================= DELETE PLAN ================= */
   const handleDeletePlan = async (id) => {
     Alert.alert("Xác nhận", "Xóa kế hoạch này?", [
       { text: "Hủy", style: "cancel" },
@@ -154,7 +148,6 @@ const ExercisePlan = () => {
     ]);
   };
 
-  /* ================= UI ================= */
   return (
     <View style={{ flex: 1 }}>
       <Button mode="contained" onPress={() => setModalVisible(true)} style={{ margin: 10 }}>
@@ -182,7 +175,6 @@ const ExercisePlan = () => {
         }
       />
 
-      {/* ============ MODAL ============ */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <ScrollView
           contentContainerStyle={{

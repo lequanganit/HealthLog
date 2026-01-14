@@ -12,7 +12,7 @@ const Exercise = () => {
     const [newName, setNewName] = useState("");
     const [newDescription, setNewDescription] = useState("");
     const [adding, setAdding] = useState(false);
-    
+
 
     const loadExercises = async () => {
         try {
@@ -29,18 +29,18 @@ const Exercise = () => {
         }
     };
     const handleDeleteExercise = async (id) => {
-    try {
-        const token = await AsyncStorage.getItem("access_token");
-        await authApis(token).delete(`${endpoints.exercises}${id}/`); 
-        
-        setExercises(prev => prev.filter(item => item.id !== id));
-        alert("Xóa bài tập thành công!");
-    } catch (err) {
-        console.log("Xóa bài tập lỗi:", err.response?.data || err.message);
-        alert("Xóa bài tập thất bại!");
-    }
+        try {
+            const token = await AsyncStorage.getItem("access_token");
+            await authApis(token).delete(`${endpoints.exercises}${id}/`);
+
+            setExercises(prev => prev.filter(item => item.id !== id));
+            alert("Xóa bài tập thành công!");
+        } catch (err) {
+            console.log("Xóa bài tập lỗi:", err.response?.data || err.message);
+            alert("Xóa bài tập thất bại!");
+        }
     };
-    
+
 
 
     const loadMore = () => {
@@ -75,14 +75,14 @@ const Exercise = () => {
 
     return (
         <View style={{ paddingHorizontal: 15, paddingTop: 20, flex: 1 }}>
-  
+
             <Button
                 title="Thêm bài tập"
                 color="#4CAF50"
                 onPress={() => setModalVisible(true)}
             />
 
-    
+
             <Modal
                 visible={modalVisible}
                 transparent={true}

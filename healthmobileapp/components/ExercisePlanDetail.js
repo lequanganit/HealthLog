@@ -17,12 +17,11 @@ const ExercisePlanDetail = ({ route }) => {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // EDIT STATE
   const [isEdit, setIsEdit] = useState(false);
   const [name, setName] = useState("");
   const [totalDuration, setTotalDuration] = useState("");
   const [note, setNote] = useState("");
-  const [planDate, setPlanDate] = useState(""); 
+  const [planDate, setPlanDate] = useState("");
 
   const loadPlan = async () => {
     try {
@@ -40,11 +39,10 @@ const ExercisePlanDetail = ({ route }) => {
       setPlan(planRes.data);
       setExercises(exRes.data);
 
-      // set dữ liệu cho edit
       setName(planRes.data.name);
       setTotalDuration(planRes.data.total_duration);
       setNote(planRes.data.note || "");
-      setPlanDate(planRes.data.date); // YYYY-MM-DD
+      setPlanDate(planRes.data.date);
     } catch (err) {
       console.log("LOAD PLAN ERROR:", err.response?.data || err.message);
     } finally {
@@ -62,7 +60,7 @@ const ExercisePlanDetail = ({ route }) => {
           name: name,
           total_duration: totalDuration,
           note: note,
-          date: planDate   // 👈 PATCH thêm date
+          date: planDate
         }
       );
 
@@ -86,7 +84,6 @@ const ExercisePlanDetail = ({ route }) => {
       <ScrollView style={MyStyles.padding}>
         {loading && <ActivityIndicator size="large" color="blue" />}
 
-        {/* ===== THÔNG TIN KẾ HOẠCH ===== */}
         {plan && (
           <Card style={MyStyles.margin}>
             <Card.Content>
@@ -142,7 +139,6 @@ const ExercisePlanDetail = ({ route }) => {
           </Card>
         )}
 
-        {/* ===== DANH SÁCH BÀI TẬP ===== */}
         <Text style={[MyStyles.title, { fontSize: 18 }]}>
           DANH SÁCH BÀI TẬP
         </Text>

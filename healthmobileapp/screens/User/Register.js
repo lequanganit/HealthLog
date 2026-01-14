@@ -80,7 +80,6 @@ const Register = () => {
         try {
             setLoading(true);
 
-            // ===== STEP 1: CREATE USER =====
             let form = new FormData();
             for (let key in user) {
                 if (key !== "confirm") {
@@ -105,7 +104,6 @@ const Register = () => {
             const createdUser = resUser.data;
             console.log("USER CREATED:", createdUser);
 
-            // ===== STEP 2: CREATE EXPERT IF NEEDED =====
             if (createdUser.role === "EXPERT") {
                 const resExpert = await Apis.post(
                     endpoints["experts"],

@@ -4,41 +4,43 @@ export default StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "#f7f7f2",
     },
     header: {
         fontSize: 22,
-        fontWeight: "bold",
+        fontWeight: "700",
         marginBottom: 12,
+        color: "#222222",
     },
     empty: {
         textAlign: "center",
         marginTop: 40,
-        color: "#777",
+        color: "#777777",
     },
     card: {
-        backgroundColor: "#F4F6F8",
+        backgroundColor: "#ffffff",
         padding: 14,
-        borderRadius: 12,
+        borderRadius: 14,
         marginBottom: 10,
         elevation: 2,
     },
     title: {
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: "700",
+        color: "#222222",
     },
     time: {
         fontSize: 16,
-        fontWeight: "bold",
-        color: "#1976D2",
+        fontWeight: "700",
+        color: "#ed8128",
     },
     date: {
         marginTop: 4,
-        color: "#555",
+        color: "#666666",
     },
     desc: {
         marginTop: 6,
-        color: "#333",
+        color: "#444444",
     },
     rowBetween: {
         flexDirection: "row",
@@ -49,6 +51,7 @@ export default StyleSheet.create({
         position: "absolute",
         right: 20,
         bottom: 20,
+        backgroundColor: "#ed8128",
     },
     modalOverlay: {
         flex: 1,
@@ -57,18 +60,19 @@ export default StyleSheet.create({
         padding: 16,
     },
     modal: {
-        backgroundColor: "#fff",
-        borderRadius: 12,
+        backgroundColor: "#ffffff",
+        borderRadius: 14,
         padding: 16,
     },
     modalTitle: {
         fontSize: 18,
-        fontWeight: "bold",
+        fontWeight: "700",
         marginBottom: 10,
+        color: "#222222",
     },
     input: {
         marginBottom: 10,
-        backgroundColor: "#fff",
+        backgroundColor: "#ffffff",
     },
     row: {
         flexDirection: "row",

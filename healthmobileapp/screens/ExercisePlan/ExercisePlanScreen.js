@@ -5,7 +5,7 @@ import ExercisePlan from "../../components/ExercisePlan";
 const ExercisePlanScreen = () => {
     return (
         <View style={{ flex: 1 }}>
-            <ExercisePlan/>
+            <ExercisePlan />
         </View>
     );
 };

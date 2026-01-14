@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {Text,TextInput,TouchableOpacity,View,FlatList,Alert,} from "react-native";
+import { Text, TextInput, TouchableOpacity, View, FlatList, Alert, } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
 import styles from "./styles";
@@ -9,7 +9,6 @@ const HealthJournal = () => {
   const [content, setContent] = useState("");
   const [journals, setJournals] = useState([]);
 
-  // Lấy danh sách nhật ký
   const fetchJournals = async () => {
     try {
       const token = await AsyncStorage.getItem("access_token");
@@ -41,7 +40,7 @@ const HealthJournal = () => {
       Alert.alert("Thành công", "Đã lưu nhật ký sức khỏe");
       setExercisePlanId("");
       setContent("");
-      fetchJournals(); // cập nhật danh sách
+      fetchJournals();
     } catch (err) {
       console.log(err.response?.data || err);
       Alert.alert("Lỗi", "Không thể lưu nhật ký");

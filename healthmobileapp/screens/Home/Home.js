@@ -19,7 +19,6 @@ const Home = ({ navigation }) => {
 
     return (
         <View style={[MyStyles.padding, styles.container]}>
-            {/* ===== HEADER ===== */}
             <Text style={styles.welcome}>
                 👋 Xin chào
             </Text>
@@ -36,7 +35,6 @@ const Home = ({ navigation }) => {
                 </Text>
             </View>
 
-            {/* ===== ACTIONS ===== */}
             <View style={styles.actions}>
                 {user?.role === "USER" && (
                     <TouchableOpacity
@@ -63,7 +61,6 @@ const Home = ({ navigation }) => {
                 )}
             </View>
 
-            {/* ===== LOGOUT ===== */}
             <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
                 <Text style={styles.logoutText}>Đăng xuất</Text>
             </TouchableOpacity>

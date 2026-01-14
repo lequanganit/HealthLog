@@ -53,7 +53,6 @@ const Login = ({ route }) => {
             data.append("client_secret", "qhCyLjsGlHORVIQqVBBiYrNA9FTXEtW3uCfKuqGAOqOeFmWUDeqgIpyGBV2MthQNKbCfO2krFRgA6ri9oaLtvRdbXqPpGM5LKn2ysqi7GDjTHRSd92lYhRbsjt5O30v8");
             data.append("grant_type", "password");
 
-            // 1️⃣ LOGIN → GET TOKEN
             const res = await Apis.post(endpoints['login'], data, {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -63,17 +62,14 @@ const Login = ({ route }) => {
             await AsyncStorage.setItem("access_token", res.data.access_token);
             await AsyncStorage.setItem("refresh_token", res.data.refresh_token);
 
-            // 2️⃣ GET CURRENT USER
             const u = await authApis(res.data.access_token)
                 .get(endpoints['current-user']);
 
-            // 3️⃣ SAVE TO CONTEXT
             dispatch({
                 type: "login",
                 payload: u.data
             });
 
-            // 4️⃣ CHECK ROLE → NAVIGATE
             if (u.data.role === "EXPERT") {
                 nav.reset({
                     index: 0,

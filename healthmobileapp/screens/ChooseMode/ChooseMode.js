@@ -8,7 +8,6 @@ const ChooseMode = () => {
 
     return (
         <SafeAreaView style={styles.safe}>
-            {/* ===== HEADER ===== */}
             <View style={styles.header}>
                 <Text style={styles.title}>
                     Chọn chế độ sử dụng
@@ -18,9 +17,7 @@ const ChooseMode = () => {
                 </Text>
             </View>
 
-            {/* ===== BODY ===== */}
             <View style={styles.body}>
-                {/* ===== KHỐI CÁ NHÂN ===== */}
                 <View style={styles.block}>
                     <Icon
                         source="account-heart"
@@ -46,7 +43,6 @@ const ChooseMode = () => {
                     </Button>
                 </View>
 
-                {/* ===== KHỐI CHUYÊN GIA ===== */}
                 <View style={styles.block}>
                     <Icon
                         source="account-tie"
@@ -78,7 +74,6 @@ const ChooseMode = () => {
 
 export default ChooseMode;
 
-/* ================= STYLE ================= */
 const styles = StyleSheet.create({
     safe: {
         flex: 1,
@@ -105,21 +100,21 @@ const styles = StyleSheet.create({
     },
 
     body: {
-        flex: 1,                     // 🔴 BẮT BUỘC
-        flexDirection: "Column",   // ✅ sắp xếp khối con theo cột
-        justifyContent: "center",    // ✅ căn giữa theo chiều cao
-        alignItems: "center",        // ✅ căn giữa theo chiều ngang của khối con
+        flex: 1,
+        flexDirection: "Column",
+        justifyContent: "center",
+        alignItems: "center",
         paddingHorizontal: 16
     },
 
     block: {
         width: "100%",
-        height: 260,                 // ✅ GIỚI HẠN CHIỀU CAO
+        height: 260,
         backgroundColor: "#fff",
         borderRadius: 18,
         padding: 20,
         alignItems: "center",
-        justifyContent: "space-between", // ✅ CÂN ĐỀU ICON – TEXT – BUTTON
+        justifyContent: "space-between",
         margin: 20,
         boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
     },

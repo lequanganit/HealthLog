@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { authApis, endpoints } from "../../utils/Apis";
 
+const PRIMARY = "#2E7D32";
+const BACKGROUND = "#F4F6F8";
+const CARD = "#FFFFFF";
+const TEXT_MAIN = "#111827";
+const TEXT_SUB = "#6B7280";
+
 const FILTERS = [
     { key: "week", label: "TUẦN" },
     { key: "month", label: "THÁNG" }
@@ -10,7 +16,6 @@ const FILTERS = [
 
 const StatisticalData = () => {
     const [filter, setFilter] = useState("week");
-
     const [weekOffset, setWeekOffset] = useState(0);
     const [month, setMonth] = useState(new Date().getMonth());
     const [year] = useState(new Date().getFullYear());
@@ -24,18 +29,15 @@ const StatisticalData = () => {
         if (!token) return;
 
         try {
-
-            const [profileRes, metricRes, planRes] =
-                await Promise.all([
-                    authApis(token).get(endpoints.health_profile),
-                    authApis(token).get(endpoints.health_metrics),
-                    authApis(token).get(endpoints.exercises_plans),
-                ]);
+            const [profileRes, metricRes, planRes] = await Promise.all([
+                authApis(token).get(endpoints.health_profile),
+                authApis(token).get(endpoints.health_metrics),
+                authApis(token).get(endpoints.exercises_plans)
+            ]);
 
             setHealthProfiles(profileRes.data);
             setHealthMetrics(metricRes.data);
             setExercisePlans(planRes.data);
-
         } catch (err) {
             console.log("STATISTIC API ERROR:", err.response?.data || err);
         }
@@ -45,19 +47,15 @@ const StatisticalData = () => {
         loadData();
     }, []);
 
-    /* ================= DATE ================= */
     const getWeekRange = () => {
         const now = new Date();
         const start = new Date(now);
-        start.setDate(
-            now.getDate() - now.getDay() + 1 + weekOffset * 7
-        );
+        start.setDate(now.getDate() - now.getDay() + 1 + weekOffset * 7);
         const end = new Date(start);
         end.setDate(start.getDate() + 6);
         return { start, end };
     };
 
-    /* ================= FILTER ================= */
     const filterByTime = (data, field = "created_date") => {
         if (filter === "week") {
             const { start, end } = getWeekRange();
@@ -69,17 +67,13 @@ const StatisticalData = () => {
 
         return data.filter(item => {
             const d = new Date(item[field]);
-            return (
-                d.getMonth() === month &&
-                d.getFullYear() === year
-            );
+            return d.getMonth() === month && d.getFullYear() === year;
         });
     };
 
     const filteredMetrics = filterByTime(healthMetrics);
     const filteredPlans = filterByTime(exercisePlans);
 
-    /* ================= CALCULATE ================= */
     const totalWater = filteredMetrics.reduce(
         (sum, item) => sum + (item.water_intake || 0),
         0
@@ -106,10 +100,8 @@ const StatisticalData = () => {
 
     const { start, end } = getWeekRange();
 
-    /* ================= UI ================= */
     return (
-        <ScrollView style={styles.container}>
-            {/* FILTER */}
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
             <View style={styles.filterRow}>
                 {FILTERS.map(item => (
                     <TouchableOpacity
@@ -132,7 +124,6 @@ const StatisticalData = () => {
                 ))}
             </View>
 
-            {/* TIME CONTROL */}
             <View style={styles.timeRow}>
                 <TouchableOpacity
                     onPress={() =>
@@ -161,10 +152,8 @@ const StatisticalData = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* HEALTH */}
             <View style={styles.block}>
                 <Text style={styles.blockTitle}>Chỉ số sức khỏe</Text>
-
                 <View style={styles.grid}>
                     <StatCard label="BMI" value={bmi} />
                     <StatCard label="Nước uống" value={`${totalWater} L`} />
@@ -173,10 +162,8 @@ const StatisticalData = () => {
                 </View>
             </View>
 
-            {/* BAR CHART */}
             <View style={styles.block}>
                 <Text style={styles.blockTitle}>Biểu đồ tổng hợp</Text>
-
                 <BarChart
                     data={[
                         { label: "Nước", value: totalWater },
@@ -186,10 +173,8 @@ const StatisticalData = () => {
                 />
             </View>
 
-            {/* EXERCISE */}
             <View style={styles.block}>
                 <Text style={styles.blockTitle}>Thời gian tập luyện</Text>
-
                 <View style={styles.exerciseCard}>
                     <View>
                         <Text style={styles.exerciseValue}>
@@ -214,7 +199,6 @@ const StatisticalData = () => {
     );
 };
 
-/* ================= COMPONENT ================= */
 const StatCard = ({ label, value }) => (
     <View style={styles.statCard}>
         <Text style={styles.statValue}>{value}</Text>
@@ -229,7 +213,6 @@ const BarChart = ({ data }) => {
         <View style={chartStyles.container}>
             {data.map((item, index) => {
                 const height = (item.value / maxValue) * 120;
-
                 return (
                     <View key={index} style={chartStyles.barWrapper}>
                         <View style={[chartStyles.bar, { height }]} />
@@ -244,61 +227,62 @@ const BarChart = ({ data }) => {
 
 export default StatisticalData;
 
-const PRIMARY = "#2E7D32";
-const BACKGROUND = "#F4F6F8";
-const CARD = "#FFFFFF";
-const TEXT_SUB = "#6B7280";
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: BACKGROUND,
-        padding: 16
+        backgroundColor: "#f7f7f2",
+        paddingHorizontal: 16,
+        paddingTop: 12
     },
     filterRow: {
         flexDirection: "row",
-        backgroundColor: CARD,
-        borderRadius: 16,
+        backgroundColor: "#ffffff",
+        borderRadius: 20,
         padding: 6,
-        marginBottom: 12
+        marginBottom: 14,
+        elevation: 2
     },
     filterBtn: {
         flex: 1,
-        paddingVertical: 8,
-        borderRadius: 12,
+        paddingVertical: 10,
+        borderRadius: 16,
         alignItems: "center"
     },
     filterActive: {
-        backgroundColor: PRIMARY
+        backgroundColor: "#ed8128"
     },
     filterText: {
+        fontSize: 14,
         fontWeight: "600",
-        color: TEXT_SUB
+        color: "#444444"
     },
     filterTextActive: {
-        color: "#fff"
+        color: "#ffffff"
     },
     timeRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 16
+        marginBottom: 18
     },
     navBtn: {
-        fontSize: 20,
-        color: PRIMARY,
-        fontWeight: "700"
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#ed8128"
     },
     timeText: {
-        fontWeight: "600"
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#333333"
     },
     block: {
-        marginBottom: 22
+        marginBottom: 24
     },
     blockTitle: {
         fontSize: 18,
-        fontWeight: "600",
-        marginBottom: 12
+        fontWeight: "700",
+        marginBottom: 12,
+        color: "#222222"
     },
     grid: {
         flexDirection: "row",
@@ -307,47 +291,51 @@ const styles = StyleSheet.create({
     },
     statCard: {
         width: "48%",
-        backgroundColor: CARD,
+        backgroundColor: "#ffffff",
         padding: 18,
-        borderRadius: 18,
-        marginBottom: 12
+        borderRadius: 20,
+        marginBottom: 12,
+        elevation: 2
     },
     statValue: {
         fontSize: 22,
-        fontWeight: "700",
-        color: PRIMARY
+        fontWeight: "800",
+        color: "#ed8128"
     },
     statLabel: {
         marginTop: 6,
-        color: TEXT_SUB
+        fontSize: 13,
+        color: "#777777"
     },
     exerciseCard: {
-        backgroundColor: CARD,
-        borderRadius: 18,
-        padding: 20,
+        backgroundColor: "#ffffff",
+        borderRadius: 20,
+        padding: 22,
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        elevation: 2
     },
     exerciseValue: {
-        fontSize: 22,
-        fontWeight: "700",
-        color: PRIMARY
+        fontSize: 20,
+        fontWeight: "800",
+        color: "#ed8128"
     },
     exerciseLabel: {
-        marginTop: 4,
-        color: TEXT_SUB
+        marginTop: 6,
+        fontSize: 13,
+        color: "#777777"
     }
 });
 
-/* ================= BAR CHART STYLE ================= */
 const chartStyles = StyleSheet.create({
     container: {
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "flex-end",
-        backgroundColor: CARD,
-        borderRadius: 18,
-        paddingVertical: 20
+        backgroundColor: "#ffffff",
+        borderRadius: 20,
+        paddingVertical: 24,
+        elevation: 2
     },
     barWrapper: {
         alignItems: "center",
@@ -355,17 +343,18 @@ const chartStyles = StyleSheet.create({
     },
     bar: {
         width: 28,
-        backgroundColor: PRIMARY,
-        borderRadius: 6
+        backgroundColor: "#ed8128",
+        borderRadius: 8
     },
     barValue: {
         marginTop: 6,
         fontWeight: "600",
-        fontSize: 12
+        fontSize: 12,
+        color: "#333333"
     },
     barLabel: {
         marginTop: 4,
         fontSize: 12,
-        color: TEXT_SUB
+        color: "#777777"
     }
 });

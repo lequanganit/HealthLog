@@ -13,7 +13,6 @@ const ExpertChoose = () => {
 
     const nav = useNavigation();
 
-    /* ================== LOAD CONNECTION ================== */
     const loadConnection = async () => {
         try {
             const token = await AsyncStorage.getItem("access_token");
@@ -33,7 +32,6 @@ const ExpertChoose = () => {
         }
     };
 
-    /* ================== LOAD EXPERTS ================== */
     const loadExperts = async () => {
         setLoading(true);
         try {
@@ -49,7 +47,6 @@ const ExpertChoose = () => {
         }
     };
 
-    /* ================== CONNECT EXPERT ================== */
     const connectExpert = async (expertId) => {
         try {
             const token = await AsyncStorage.getItem("access_token");
@@ -74,7 +71,6 @@ const ExpertChoose = () => {
         loadExperts();
     }, []);
 
-    /* ================== EMPTY STATE ================== */
     if (!loading && experts.length === 0) {
         return (
             <SafeAreaView style={styles.safe}>
@@ -102,13 +98,11 @@ const ExpertChoose = () => {
         );
     }
 
-    /* ================== MAIN UI ================== */
     return (
         <SafeAreaView style={styles.safe}>
             <View style={styles.container}>
                 {loading && <ActivityIndicator size="large" />}
 
-                {/* ===== CONNECTED ===== */}
                 {connection && (
                     <Text style={styles.connectedText}>
                         ✅ Đã kết nối với chuyên gia{" "}
@@ -116,7 +110,6 @@ const ExpertChoose = () => {
                     </Text>
                 )}
 
-                {/* ===== NOT CONNECTED ===== */}
                 {!connection && (
                     <FlatList
                         data={experts}
@@ -159,7 +152,6 @@ const ExpertChoose = () => {
 
 export default ExpertChoose;
 
-/* ================== STYLES ================== */
 const styles = StyleSheet.create({
     safe: {
         flex: 1,

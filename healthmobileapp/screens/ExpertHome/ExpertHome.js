@@ -1,10 +1,4 @@
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Image
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -18,7 +12,6 @@ const ExpertHome = () => {
 
     const [connectionCount, setConnectionCount] = useState(0);
 
-    /* ===== LOAD CONNECTION COUNT ===== */
     useEffect(() => {
         const loadConnections = async () => {
             try {
@@ -45,7 +38,6 @@ const ExpertHome = () => {
         loadConnections();
     }, []);
 
-    /* ===== LOGOUT ===== */
     const logout = async () => {
         await AsyncStorage.multiRemove([
             "access_token",
@@ -60,7 +52,6 @@ const ExpertHome = () => {
         });
     };
 
-    /* ===== DATA ===== */
     const fullName =
         user?.first_name || user?.last_name
             ? `${user.first_name || ""} ${user.last_name || ""}`
@@ -72,7 +63,6 @@ const ExpertHome = () => {
 
     return (
         <View style={styles.container}>
-            {/* ===== HEADER ===== */}
             <View style={styles.header}>
                 <View style={styles.avatarWrapper}>
                     {avatarUrl ? (
@@ -97,7 +87,6 @@ const ExpertHome = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* ===== STATS ===== */}
             <View style={styles.stats}>
                 <View style={styles.statBox}>
                     <Text style={styles.statNumber}>
@@ -114,7 +103,6 @@ const ExpertHome = () => {
                 </View>
             </View>
 
-            {/* ===== ACTIONS ===== */}
             <TouchableOpacity
                 style={styles.card}
                 onPress={() => navigation.navigate("ExpertProfile")}
