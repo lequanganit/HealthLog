@@ -102,7 +102,7 @@ class HealthJournalSerializer(serializers.ModelSerializer):
         fields = ['id','exercise_plan','content','created_date']
 
 class ReminderSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField()
+    user = serializers.CharField(source='user.username', read_only=True)
     describe  = serializers.CharField(required=False,allow_blank=True)
     class Meta:
         model = Reminder
