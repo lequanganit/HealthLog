@@ -164,9 +164,10 @@ class ExerciseView(viewsets.ViewSet,
                    generics.ListAPIView,
                    generics.CreateAPIView,
                    generics.RetrieveAPIView,
+                   generics.UpdateAPIView,
                    generics.DestroyAPIView):
     queryset = Exercise.objects.filter(active=True)
-    http_method_names = ['get', 'post',  'delete']
+    http_method_names = ['get', 'post', 'patch', 'delete']
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = paginators.ItemPagination

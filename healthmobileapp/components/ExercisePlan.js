@@ -28,25 +28,42 @@ const ExercisePlan = () => {
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const token = await AsyncStorage.getItem("access_token");
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("access_token");
 
-        const planRes = await authApis(token).get(endpoints.exercises_plans);
-        setPlans(planRes.data.results || planRes.data);
 
-        const exRes = await authApis(token).get(endpoints.exercises);
-        setExercises(exRes.data.results || exRes.data);
-      } catch (err) {
-        console.log(err.response?.data || err.message);
-        Alert.alert("Lỗi", "Không tải được dữ liệu");
-      } finally {
-        setLoading(false);
+      const planRes = await authApis(token).get(endpoints.exercises_plans);
+      setPlans(planRes.data.results || planRes.data);
+
+
+      let page = 1;
+      let allExercises = [];
+
+      while (true) {
+        const exRes = await authApis(token).get(`${endpoints.exercises}?page=${page}&size=50`);
+
+        const data = exRes.data.results || [];
+        allExercises = [...allExercises, ...data];
+
+        if (data.length < 50) break; 
+        page++;
       }
-    };
+
+      setExercises(allExercises);
+      console.log("TOTAL EXERCISES:", allExercises.length);
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+      Alert.alert("Lỗi", "Không tải được dữ liệu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
     loadData();
   }, []);
+
 
   const toggleExercise = (id) => {
     setSelectedExercises((prev) => {

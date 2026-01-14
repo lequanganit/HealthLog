@@ -83,11 +83,11 @@ class ExerciseSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_date', 'updated_date']
 
 class ExerciseInPlanSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='exercise.name')
-    description = serializers.CharField(source='exercise.description')
+    exercise = ExerciseSerializer(read_only=True)
     class Meta:
         model = ExercisePlant_Exercise
-        fields = ['id', 'name', 'description', 'repetitions', 'duration']
+        fields = ['id', 'exercise', 'repetitions', 'duration']
+
 
 class AddExerciseToPlanSerializer(serializers.ModelSerializer):
     exercise_id = serializers.IntegerField()

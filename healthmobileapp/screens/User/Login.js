@@ -49,8 +49,8 @@ const Login = ({ route }) => {
             const data = new URLSearchParams();
             data.append("username", user.username);
             data.append("password", user.password);
-            data.append("client_id", "aJs2DrCtueOnNpvwpJVe12U0ZU21FTqBknERyUNO");
-            data.append("client_secret", "qhCyLjsGlHORVIQqVBBiYrNA9FTXEtW3uCfKuqGAOqOeFmWUDeqgIpyGBV2MthQNKbCfO2krFRgA6ri9oaLtvRdbXqPpGM5LKn2ysqi7GDjTHRSd92lYhRbsjt5O30v8");
+            data.append("client_id", process.env.EXPO_PUBLIC_CLIENT_ID);
+            data.append("client_secret", process.env.EXPO_PUBLIC_CLIENT_SECRET);
             data.append("grant_type", "password");
 
             const res = await Apis.post(endpoints['login'], data, {

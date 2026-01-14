@@ -34,7 +34,7 @@ export default StyleSheet.create({
     minHeight: 120,
   },
   button: {
-    backgroundColor: "#27ae60",
+    backgroundColor: "#4c4fa1",
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: "center",

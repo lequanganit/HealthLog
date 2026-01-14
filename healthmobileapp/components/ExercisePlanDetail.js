@@ -147,7 +147,7 @@ const ExercisePlanDetail = ({ route }) => {
           exercises.map((ex) => (
             <List.Item
               key={ex.id}
-              title={ex.name}
+              title={ex.exercise.name}
               description={`Số lần: ${ex.repetitions} | ${ex.duration} phút`}
               left={(props) => (
                 <List.Icon {...props} icon="dumbbell" />
